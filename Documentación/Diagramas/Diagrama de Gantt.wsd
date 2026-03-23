@@ -1,0 +1,50 @@
+@startgantt Diagrama de Gantt Syshub
+title Cronograma Syshub - Fase 2
+language es
+printscale daily
+
+Project starts 2026-03-23
+
+[Modelo de Datos Usuarios] lasts 2 days
+[Interfaz de Acceso] lasts 3 days
+[Verificacion de Roles] lasts 3 days
+[M1: Autenticacion] happens 2026-03-31
+
+[Interfaz de Acceso] starts at [Modelo de Datos Usuarios]'s end
+[Verificacion de Roles] starts at [Interfaz de Acceso]'s end
+
+[Tablas Proyectos] lasts 2 days
+[Repositorio Archivos] lasts 5 days
+[Galeria Proyectos] lasts 5 days
+
+[Tablas Proyectos] starts 2026-04-01
+[Repositorio Archivos] starts at [Tablas Proyectos]'s end
+[Galeria Proyectos] starts at [Repositorio Archivos]'s end
+
+[BD Hilos y Comentarios] lasts 2 days
+[Gestor de Hilos] lasts 4 days
+[Algoritmo Valoracion] lasts 4 days
+
+[BD Hilos y Comentarios] starts at [Tablas Proyectos]'s end
+[Gestor de Hilos] starts at [BD Hilos y Comentarios]'s end
+[Algoritmo Valoracion] starts at [Gestor de Hilos]'s end
+
+[Organizacion Pensum] lasts 4 days
+[Bandeja Reportes] lasts 3 days
+[M2: Entrega Final] happens 2026-04-30
+
+[Organizacion Pensum] starts at [BD Hilos y Comentarios]'s end
+[Bandeja Reportes] starts at [Gestor de Hilos]'s end
+
+[Modelo de Datos Usuarios] is colored in LightBlue
+[Interfaz de Acceso] is colored in LightBlue
+[Verificacion de Roles] is colored in LightBlue
+[Tablas Proyectos] is colored in LightGreen
+[Repositorio Archivos] is colored in LightGreen
+[Galeria Proyectos] is colored in LightGreen
+[BD Hilos y Comentarios] is colored in LightSalmon
+[Gestor de Hilos] is colored in LightSalmon
+[Algoritmo Valoracion] is colored in LightSalmon
+[Organizacion Pensum] is colored in Plum
+[Bandeja Reportes] is colored in Plum
+@endgantt

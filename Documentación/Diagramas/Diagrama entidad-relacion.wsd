@@ -1,0 +1,140 @@
+@startuml DER Syshub
+
+!define PK(x) <b>PK: x</b>
+!define FK(x) <i>FK: x</i>
+
+skinparam linetype ortho
+skinparam class {
+    BackgroundColor White
+    ArrowColor #2D4059
+    BorderColor #2D4059
+}
+
+entity "roles" as rol {
+    PK(id_rol)
+    --
+    nombre_rol
+}
+
+entity "usuarios" as usuario {
+    PK(id_usuario)
+    --
+    nombre
+    correo
+    password_hash
+    FK(id_rol)
+    FK(id_estado)
+    fecha_registro
+}
+
+entity "sesiones" as sesion {
+    PK(id_sesion)
+    --
+    FK(id_usuario)
+    token_sesion
+    fecha_inicio
+    ip_origen
+    dispositivo
+}
+
+entity "pensum" as pensum {
+    PK(id_pensum)
+    --
+    codigo_pensum
+    año_vigencia
+}
+
+entity "cursos" as curso {
+    PK(id_curso)
+    --
+    nombre_curso
+    FK(id_area)
+    FK(id_pensum)
+}
+
+entity "area_tecnica" as area {
+    PK(id_area)
+    --
+    nombre_area
+}
+
+entity "publicaciones" as pub {
+    PK(id_publicacion)
+    --
+    titulo
+    FK(id_usuario)
+    FK(id_curso)
+    fecha_creacion
+    tipo_contenido
+}
+
+entity "proyectos" as proy {
+    PK(FK(id_publicacion))
+    --
+    descripcion_tecnica
+    stack_tecnologico
+    url_adjunto
+    es_destacado
+}
+
+entity "posts_foros" as foro {
+    PK(FK(id_publicacion))
+    --
+    es_pregunta_tecnica
+    estado_resolucion
+}
+
+entity "articulos_blogs" as blog {
+    PK(FK(id_publicacion))
+    --
+    cuerpo_extenso
+    url_imagen_portada
+}
+
+entity "comentarios" as com {
+    PK(id_comentario)
+    --
+    FK(id_publicacion)
+    FK(id_usuario)
+    contenido
+    puntuacion_calidad
+}
+
+entity "etiquetas" as tag {
+    PK(id_etiqueta)
+    --
+    nombre_tag
+}
+
+entity "tag_publicaciones" as p_tag {
+    PK(FK(id_publicacion))
+    PK(FK(id_etiqueta))
+}
+
+entity "reportes" as rep {
+    PK(id_reporte)
+    --
+    FK(id_publicacion)
+    FK(id_usuario_reporta)
+    motivo_denuncia
+    id_moderador_asignado
+    estado_resolucion
+}
+
+usuario ||--{ sesion
+rol ||--{ usuario
+pensum ||--{ curso
+area ||--{ curso
+curso ||--{ pub
+
+pub ||--|| proy
+pub ||--|| foro
+pub ||--|| blog
+
+pub ||--{ com
+pub ||--{ p_tag
+tag ||--{ p_tag
+pub ||--{ rep
+usuario ||--{ com
+
+@enduml

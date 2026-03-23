@@ -1,0 +1,91 @@
+@startuml Mapa de Procesos - Syshub
+title Mapa de Procesos: Syshub
+
+skinparam rectangle {
+    BackgroundColor<<Estrategico>> #2D4059
+    FontColor<<Estrategico>> white
+    BackgroundColor<<Operativo>> #F0F5F9
+    BackgroundColor<<Soporte>> #1E2022
+    FontColor<<Soporte>> white
+}
+
+skinparam database {
+    BackgroundColor #603070
+    FontColor white
+}
+
+package "PROCESOS ESTRATÉGICOS" <<Estrategico>> {
+    [Definir Reglas del Sistema\n(Administrador)] as PE1
+    [Planificación Educativa\n(Auxiliares)] as PE2
+}
+
+node "PROCESOS OPERATIVOS" #DAE8FC {
+
+    package "GESTIÓN DE IDENTIDAD" #C9D6DF {
+        [Ingreso de\nCredenciales] as ID1
+        (¿Rol\nVálido?) as ID2
+        [Verificación de\nRoles y Sesiones] as ID3
+        [Perfil Personal\nActualizado] as ID4
+        
+        ID1 -> ID2
+        ID2 -> ID3
+        ID3 -> ID4
+    }
+
+    package "REPOSITORIO DE PROYECTOS" #D1E8E2 {
+        [Carga de\nProyecto] as RP1
+        [Indexación y\nValidación] as RP2
+        (¿Proyecto\nDestacado?) as RP3
+        [Curaduría\nAcadémica] as RP4
+        [Galería de Proyectos\nPublicada] as RP5
+        
+        RP1 -> RP2
+        RP2 -> RP3
+        RP3 -> RP4 : Sí
+        RP4 -> RP5
+    }
+
+    package "SECCIÓN SOCIAL" #F9E2AF {
+        [Crear Publicación/\nComentario] as SS1
+        [Algoritmo de Valoración\ny Filtro de Calidad] as SS2
+        [Gestión de\nHilos] as SS3
+        (Ranking de Contenido\nAcadémico) as SS4
+        
+        SS1 -> SS2
+        SS2 -> SS3
+        SS3 -> SS4
+    }
+
+    package "PANEL DE ADMINISTRACIÓN" #E5D1FA {
+        [Reporte de\nModeración] as AD1
+        (¿Sanción\nVálida?) as AD2
+        [CRUD de\nUsuarios] as AD3
+        [Clasificación Sistémica\n(Pensum)] as AD4
+        
+        AD1 -> AD2
+        AD2 -> AD3 : Sí
+        AD3 -> AD4
+    }
+}
+
+package "PROCESOS DE SOPORTE" <<Soporte>> {
+    [Seguridad de Identidad] as PS2
+}
+
+database "DB Oracle" {
+    [Registro de Logs\ny Auditoría (BD)] as DB_LOG
+    [Almacenamiento de\nProyectos (BD)] as DB_PROY
+    [Modelo de\nDatos (BD)] as DB_SIST
+}
+
+PE1 --> ID3 : Define Roles
+PE2 --> RP4 : Criterios de Guía
+PE1 --> AD4 : Actualiza Pensum
+
+ID3 --> DB_LOG : Genera Log
+RP5 --> DB_PROY : Persistencia
+AD4 --> DB_SIST : Mapea Relaciones
+SS4 --> PE2 : Retroalimentación
+
+PS2 --> ID1 : Encriptación
+@enduml
