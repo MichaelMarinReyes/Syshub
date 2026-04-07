@@ -43,7 +43,7 @@ CREATE TABLE usuarios (
     correo VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     id_rol UUID REFERENCES roles(id_rol),
-    id_estado INTEGER REFERENCES estados(id_estado),
+    id_estado UUID REFERENCES estados(id_estado),
     fecha_registro TIMESTAMP NOT NULL
 );
 
