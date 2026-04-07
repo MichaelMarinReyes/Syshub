@@ -11,11 +11,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE roles (
     id_rol UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    nombre_rol VARCHAR(50) UNIQUE NOT NULL
+    nombre_rol VARCHAR(50) UNIQUE NOT NULL,
+    descripcion VARCHAR(200) NOT NULL
 );
 
 CREATE TABLE estados (
-    id_estado SERIAL PRIMARY KEY,
+    id_estado UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     nombre_estado VARCHAR(50) NOT NULL
 );
 
@@ -38,11 +39,12 @@ CREATE TABLE etiquetas (
 CREATE TABLE usuarios (
     id_usuario UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
     correo VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     id_rol UUID REFERENCES roles(id_rol),
     id_estado INTEGER REFERENCES estados(id_estado),
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_registro TIMESTAMP NOT NULL
 );
 
 CREATE TABLE cursos (
