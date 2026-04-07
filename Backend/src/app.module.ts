@@ -3,20 +3,28 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
+import { ConfigModule } from '@nestjs/config';
+import { RolesModule } from './roles/roles.module';
+import { StatusesModule } from './statuses/statuses.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot ({
+      isGlobal: true
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'admin',
-      password: 'administrador',
-      database: 'syshub_db',
-      autoLoadEntities: true, // Muy importante para cargar tus módulos automáticamente
-      synchronize: true, // Solo en desarrollo: crea las tablas según tus clases de TypeScript
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT!, 10),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      autoLoadEntities: true,
+      synchronize: false,
     }),
     UsersModule,
+    RolesModule,
+    StatusesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
