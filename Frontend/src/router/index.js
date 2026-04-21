@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../components/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
 
 const routes = [
     {
@@ -12,6 +13,12 @@ const routes = [
         component: LoginView,
         meta: { title: 'Iniciar Sesión - Syshub' }
     },
+    {
+        path:'/register',
+        name: 'register',
+        component: RegisterView,
+        meta: { title: 'Registrarse - Syshub'}
+    }
     /*{
       path: '/admin',
       name: 'admin-dashboard',
