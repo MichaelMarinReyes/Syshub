@@ -28,7 +28,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const { password, roleId, ...userData } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const targetStatus = (roleId === 'Estudiante') ? 'Acivo' : 'Inactivo';
+    const targetStatus = (roleId === 'Estudiante') ? 'Activo' : 'Inactivo';
     const [role, status] = await Promise.all([
       this.roleRepository.findOneBy({ name: roleId }),
       this.statusRepository.findOneBy({ name: targetStatus })

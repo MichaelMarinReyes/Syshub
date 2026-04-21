@@ -16,10 +16,10 @@ export class CreateUserDto {
   @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
   password!: string;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   @IsIn(['Moderador', 'Auxiliar', 'Estudiante'], {
     message: 'Solo puedes registrarte como Moderador, Auxiliar o Estudiante'
   })
-  roleId?: string;0
+  roleId?: string;
 }
