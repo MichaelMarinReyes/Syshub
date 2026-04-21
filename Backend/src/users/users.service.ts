@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UsersService {
@@ -22,8 +23,21 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const newUser = this.userRepository.create(createUserDto);
-    return await this.userRepository.save(newUser);
+    const { password, ...userData } = createUserDto;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = this.userRepository.create({
+      ...userData,
+      password: hashedPassword
+    });
+
+    try {
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      if (error === '23505') {
+        throw new ConflictException('El correo ya está registrado');
+      }
+      throw new InternalServerErrorException();
+    }
   }
 
   async findAll() {
