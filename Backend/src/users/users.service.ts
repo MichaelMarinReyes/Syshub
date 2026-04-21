@@ -5,12 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
+import { Role } from '@/roles/entities/role.entity';
+import { Status } from '@/statuses/entities/status.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Role) private roleRepository: Repository<Role>,
+    @InjectRepository(Status) private statusRepository: Repository<Status>
   ) { }
 
   async findOneByEmail(email: string): Promise<User | null> {
@@ -23,11 +26,26 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const { password, ...userData } = createUserDto;
+    const { password, roleId, ...userData } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
+    const targetStatus = (roleId === 'Estudiante') ? 'Acivo' : 'Inactivo';
+    const [role, status] = await Promise.all([
+      this.roleRepository.findOneBy({ name: roleId }),
+      this.statusRepository.findOneBy({ name: targetStatus })
+    ])
+
+    if (!role || !status) {
+      throw new InternalServerErrorException('Error al registrarse.');
+    }
+
     const newUser = this.userRepository.create({
-      ...userData,
-      password: hashedPassword
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      password: hashedPassword,
+      role: role,
+      status: status,
+      createdAt: new Date()
     });
 
     try {

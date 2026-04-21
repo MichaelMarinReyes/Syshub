@@ -14,6 +14,10 @@ export class AuthService {
             throw new UnauthorizedException('Credenciales incorrectas');
         }
 
+        if (user.status.name !== 'Activo') {
+            throw new UnauthorizedException('Tu cuenta se encuentra Inactiva, si este es un error comunícate con un Administrador');
+        }
+        
         const isMatch = await bcrypt.compare(pass.trim(), user.password.trim());
 
         if (!isMatch) {

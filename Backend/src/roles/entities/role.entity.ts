@@ -6,7 +6,7 @@ export class Role {
   @PrimaryGeneratedColumn('uuid', { name: 'id_rol' })
   id!: string;
 
-  @Column({ name: 'nombre_rol', type: 'varchar', length: 50 })
+  @Column({ name: 'nombre_rol', unique: true, type: 'varchar', length: 50 })
   name!: string;
 
   @Column({ name: 'descripcion', type: 'varchar', length: 200 })

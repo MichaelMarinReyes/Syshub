@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsIn, IsUUID } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -13,10 +13,13 @@ export class CreateUserDto {
   email!: string;
 
   @IsString()
-  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
   password!: string;
 
   @IsUUID()
-  @IsOptional()
-  roleId?: string;
+  @IsNotEmpty()
+  @IsIn(['Moderador', 'Auxiliar', 'Estudiante'], {
+    message: 'Solo puedes registrarte como Moderador, Auxiliar o Estudiante'
+  })
+  roleId?: string;0
 }
