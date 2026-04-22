@@ -1,5 +1,10 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 const form = ref({
   email: '',
@@ -11,9 +16,19 @@ const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value
 }
 
-const handleSubmit = () => {
-  console.log('Datos enviados a NestJS:', form.value)
-  // Aquí iría axios.post()
+const handleSubmit = async () => {
+  try {
+    await authStore.login(form.value.email, form.value.password);
+
+    if (authStore.userRole === 'Admin') {
+      router.push('/admin');
+    } else {
+      router.push('/');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Credenciales incorrectas');
+  }
 }
 </script>
 

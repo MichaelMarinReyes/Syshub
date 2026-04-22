@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginView from '../components/LoginView.vue'
+import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import AdminUsersView from '../views/Admin/AdminUsersView.vue'
 
 const routes = [
     {
@@ -18,13 +19,13 @@ const routes = [
         name: 'register',
         component: RegisterView,
         meta: { title: 'Registrarse - Syshub'}
-    }
-    /*{
+    },
+    {
       path: '/admin',
       name: 'admin-dashboard',
-      component: () => import('../views/AdminDashboard.vue'),
-      meta: { requiresAuth: true, role: 'Administrador' }
-    },
+      component: AdminUsersView,
+      meta: { requiresAuth: true, role: 'Admin' }
+    },/*
     {
       path: '/estudiante',
       name: 'student-home',
@@ -40,12 +41,14 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('token')
-    const userRole = localStorage.getItem('role')
+    
+    const userData = JSON.parse(localStorage.getItem('user') || '{}')
+    const userRole = userData.role
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/login')
     } else if (to.meta.role && to.meta.role !== userRole) {
-        next('/')
+        next('/login') 
     } else {
         next()
     }
