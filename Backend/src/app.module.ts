@@ -9,6 +9,9 @@ import { StatusesModule } from './statuses/statuses.module';
 import { AuthModule } from './auth/auth.module';
 import { ReportsModule } from './reports/reports.module';
 import { PublicationsModule } from './publications/publications.module';
+import { PensumModule } from './pensum/pensum.module';
+import { TechnicalAreaModule } from './technical-area/technical-area.module';
+import { CourseModule } from './course/course.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { PublicationsModule } from './publications/publications.module';
     AuthModule,
     ReportsModule,
     PublicationsModule,
+    PensumModule,
+    TechnicalAreaModule,
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

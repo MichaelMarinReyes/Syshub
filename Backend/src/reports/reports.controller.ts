@@ -3,7 +3,7 @@ import { ReportsService } from './reports.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
 
-@Controller('report')
+@Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
@@ -12,7 +12,7 @@ export class ReportsController {
     return this.reportsService.create(createReportDto);
   }
 
-  @Get('reports')
+  @Get()
   findAll() {
     return this.reportsService.findAll();
   }
