@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import AdminUsersView from '../views/Admin/AdminUsersView.vue'
+import AdminLayout from '../layouts/AdminLayout.vue'
 
 const routes = [
     {
@@ -15,16 +16,35 @@ const routes = [
         meta: { title: 'Iniciar Sesión - Syshub' }
     },
     {
-        path:'/register',
+        path: '/registro',
         name: 'register',
         component: RegisterView,
-        meta: { title: 'Registrarse - Syshub'}
+        meta: { title: 'Registrarse - Syshub' }
     },
     {
-      path: '/admin',
-      name: 'admin-dashboard',
-      component: AdminUsersView,
-      meta: { requiresAuth: true, role: 'Admin' }
+        path: '/admin',
+        component: AdminLayout,
+        meta: { requiresAuth: true, role: 'Admin' },
+        redirect: { name: 'admin-users' },
+        children: [
+            {
+                path: 'usuarios', 
+                name: 'admin-users',
+                component: () => import('@/views/Admin/AdminUsersView.vue'),
+                meta: { title: 'Usuarios - Syshub Admin' }
+            },
+            {
+                path: 'reportes',
+                name: 'admin-reports',
+                component: () => import('@/views/Admin/ReportModerationView.vue'),
+                meta: { title: 'Moderación - Syshub Admin' }
+            },/*
+            {
+                path: 'clasificacion',
+                name: 'admin-classification',
+                component: () => import('@/views/Admin/ClassificationView.vue'),
+            }*/
+        ]
     },/*
     {
       path: '/estudiante',
@@ -40,18 +60,30 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('token')
-    
-    const userData = JSON.parse(localStorage.getItem('user') || '{}')
-    const userRole = userData.role
+    const token = localStorage.getItem('token')
+    const isAuthenticated = !!token
+
+    let userRole = null
+    try {
+        const userData = JSON.parse(localStorage.getItem('user') || '{}')
+        userRole = userData.role
+    } catch (e) {
+        console.error("Error parseando usuario del localStorage")
+    }
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        next('/login')
-    } else if (to.meta.role && to.meta.role !== userRole) {
-        next('/login') 
-    } else {
-        next()
+        return next('/login')
     }
+
+    if (to.meta.role && to.meta.role !== userRole) {
+        return next(userRole === 'Estudiante' ? '/estudiante' : '/login')
+    }
+
+    if (to.meta.title) {
+        document.title = to.meta.title
+    }
+
+    next()
 })
 
 export default router

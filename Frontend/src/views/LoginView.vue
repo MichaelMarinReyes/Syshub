@@ -21,13 +21,15 @@ const handleSubmit = async () => {
     await authStore.login(form.value.email, form.value.password);
 
     if (authStore.userRole === 'Admin') {
-      router.push('/admin');
+      router.push({ name: 'admin-users' });
+    } else if (authStore.userRole === 'Estudiante') {
+      router.push({ name: 'student-home' });
     } else {
       router.push('/');
     }
   } catch (error) {
+    toast.error("Credenciales incorrectas.");
     console.error('Error:', error);
-    alert('Credenciales incorrectas');
   }
 }
 </script>
@@ -92,11 +94,10 @@ const handleSubmit = async () => {
 
       <p class="text-center text-base font-medium text-gray-400 mt-8">
         ¿No tienes cuenta?
-        <router-link to="/register" class="text-blue-500 hover:text-blue-400 font-semibold ml-1 transition-colors">
+        <router-link to="/registro" class="text-blue-500 hover:text-blue-400 font-semibold ml-1 transition-colors">
           Regístrate aquí
         </router-link>
       </p>
-
     </form>
   </div>
 </template>

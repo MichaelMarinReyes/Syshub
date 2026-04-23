@@ -22,26 +22,30 @@ const handleLogout = () => {
     </div>
 
     <nav class="flex-1 mt-6 px-4 space-y-2">
+      
       <router-link 
         v-if="authStore.userRole === 'Admin'" 
-        to="/admin"
-        class="flex items-center space-x-3 p-3 rounded-xl transition-all bg-white/10 border border-white/10"
+        to="/admin/usuarios"
+        class="flex items-center space-x-3 p-3 rounded-xl transition-all text-blue-100 hover:bg-white/10 hover:text-white"
+        active-class="bg-white/20 text-white border border-white/20 shadow-inner"
       >
         <i class="fas fa-users w-5"></i>
         <span class="font-medium">Usuarios</span>
       </router-link>
 
       <router-link 
-        to="/reportes"
-        class="flex items-center space-x-3 p-3 rounded-xl transition-all hover:bg-white/10 text-blue-100 hover:text-white"
+        to="/admin/reportes"
+        class="flex items-center space-x-3 p-3 rounded-xl transition-all text-blue-100 hover:bg-white/10 hover:text-white"
+        active-class="bg-white/20 text-white border border-white/20 shadow-inner"
       >
         <i class="fas fa-shield-alt w-5"></i>
         <span class="font-medium">Reportes</span>
       </router-link>
 
       <router-link 
-        to="/clasificacion"
-        class="flex items-center space-x-3 p-3 rounded-xl transition-all hover:bg-white/10 text-blue-100 hover:text-white"
+        to="/admin/clasificacion"
+        class="flex items-center space-x-3 p-3 rounded-xl transition-all text-blue-100 hover:bg-white/10 hover:text-white"
+        active-class="bg-white/20 text-white border border-white/20 shadow-inner"
       >
         <i class="fas fa-layer-group w-5"></i>
         <span class="font-medium">Clasificación</span>
