@@ -61,6 +61,15 @@ export class UsersService {
   async findAll() {
     return await this.userRepository.find({
       relations: ['role', 'status'],
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        createdAt: true,
+        role: { name: true },
+        status: { name: true }
+      }
     });
   }
 
@@ -69,7 +78,7 @@ export class UsersService {
       where: { id },
       relations: ['role', 'status'],
     });
-    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+    if (!user) throw new NotFoundException(`Usuario no encontrado`);
     return user;
   }
 
