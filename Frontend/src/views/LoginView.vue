@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
+
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -22,6 +23,8 @@ const handleSubmit = async () => {
 
     if (authStore.userRole === 'Admin') {
       router.push({ name: 'admin-users' });
+    } else if (authStore.userRole === 'Moderador') {
+      router.push({ name: 'mod-reports'})
     } else if (authStore.userRole === 'Estudiante') {
       router.push({ name: 'student-home' });
     } else {

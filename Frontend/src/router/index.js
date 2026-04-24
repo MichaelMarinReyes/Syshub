@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import AdminUsersView from '../views/Admin/AdminUsersView.vue'
-import AdminLayout from '../layouts/AdminLayout.vue'
+import AdminUsersView from '../views/admin/AdminUsersView.vue'
+import MainLayout from '../layouts/MainLayout.vue'
 
 const routes = [
     {
@@ -22,30 +22,76 @@ const routes = [
         meta: { title: 'Registrarse - Syshub' }
     },
     {
+        path: '/app',
+        component: MainLayout,
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: 'sys-reddit',
+                name: 'sys-reddit',
+                component: () => import('@/views/SysRedditView.vue'),
+                meta: { title: 'Sys-Reddit - Foro de Discusión' }
+            },
+        ]
+    },
+    {
         path: '/admin',
-        component: AdminLayout,
+        component: MainLayout,
         meta: { requiresAuth: true, role: 'Admin' },
         redirect: { name: 'admin-users' },
         children: [
             {
-                path: 'usuarios', 
+                path: 'usuarios',
                 name: 'admin-users',
-                component: () => import('@/views/Admin/AdminUsersView.vue'),
+                component: () => import('@/views/admin/AdminUsersView.vue'),
                 meta: { title: 'Usuarios - Syshub Admin' }
             },
             {
                 path: 'reportes',
                 name: 'admin-reports',
-                component: () => import('@/views/Admin/ReportModerationView.vue'),
+                component: () => import('@/views/admin/ReportModerationView.vue'),
                 meta: { title: 'Moderación - Syshub Admin' }
             },
             {
                 path: 'clasificacion',
                 name: 'admin-classification',
-                component: () => import('@/views/Admin/ClasificationView.vue'),
+                component: () => import('@/views/admin/ClasificationView.vue'),
             }
         ]
-    },/*
+    },
+    {
+        path: '/moderador',
+        component: MainLayout,
+        meta: { requiresAuth: true, role: 'Moderador' },
+        redirect: { name: 'mod-reports' },
+        children: [
+            {
+                path: 'reportes',
+                name: 'mod-reports',
+                component: () => import('@/views/moderator/ModeratorView.vue'),
+                meta: { title: 'Cola de Reportes - Moderación' }
+            },
+            {
+                path: 'revision',
+                name: 'mod-review',
+                component: () => import('@/views/moderator/PendingReviewView.vue'),
+                meta: { title: 'Revisión Pendiente - Moderación' }
+            },
+            {
+                path: 'foros',
+                name: 'mod-forums',
+                component: () => import('@/views/moderator/ForumsModView.vue'),
+                meta: { title: 'Gestión de Foros - Moderación' }
+            },
+            {
+                path: 'articulos',
+                name: 'mod-articles',
+                component: () => import('@/views/moderator/ArticlesModView.vue'),
+                meta: { title: 'Gestión de Artículos - Moderación' }
+            }
+        ]
+    }
+    /*
     {
       path: '/estudiante',
       name: 'student-home',
