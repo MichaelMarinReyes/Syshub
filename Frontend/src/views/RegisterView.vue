@@ -1,8 +1,47 @@
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import api from '../api/axios';
+
+const router = useRouter();
+const loading = ref(false);
+const errorMessage = ref('');
+
+const form = ref({
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  roleId: 'Estudiante'
+});
+
+const handleRegister = async () => {
+  loading.value = true;
+  errorMessage.value = '';
+
+  try {
+    console.log(form.value)
+    await api.post('/users/register', form.value);
+
+    alert('¡Registro exitoso! Ya puedes intentar iniciar sesión.');
+    //router.push('/login');
+
+  } catch (error) {
+    const backendMessage = error.response?.data?.message;
+    errorMessage.value = Array.isArray(backendMessage)
+      ? backendMessage.join(', ')
+      : (backendMessage || 'Ocurrió un error inesperado al registrarse');
+  } finally {
+    loading.value = false;
+  }
+};
+</script>
+
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
     <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
       <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Crear cuenta en Syshub</h2>
-      
+
       <form @submit.prevent="handleRegister" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -56,48 +95,10 @@
       </form>
 
       <p class="mt-6 text-center text-sm text-gray-600">
-        ¿Ya tienes cuenta? 
-        <router-link to="/login" class="font-medium text-indigo-600 hover:text-indigo-500">Inicia sesión aquí</router-link>
+        ¿Ya tienes cuenta?
+        <router-link to="/login" class="font-medium text-indigo-600 hover:text-indigo-500">Inicia sesión
+          aquí</router-link>
       </p>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '../api/axios';
-
-const router = useRouter();
-const loading = ref(false);
-const errorMessage = ref('');
-
-const form = ref({
-  firstName: '',
-  lastName: '',
-  email: '',
-  password: '',
-  roleId: 'Estudiante'
-});
-
-const handleRegister = async () => {
-  loading.value = true;
-  errorMessage.value = '';
-  
-  try {
-    console.log(form.value)
-    await api.post('/users/register', form.value);
-    
-    alert('¡Registro exitoso! Ya puedes intentar iniciar sesión.');
-    //router.push('/login');
-    
-  } catch (error) {
-    const backendMessage = error.response?.data?.message;
-    errorMessage.value = Array.isArray(backendMessage) 
-      ? backendMessage.join(', ') 
-      : (backendMessage || 'Ocurrió un error inesperado al registrarse');
-  } finally {
-    loading.value = false;
-  }
-};
-</script>

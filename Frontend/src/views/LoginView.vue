@@ -1,5 +1,10 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 const form = ref({
   email: '',
@@ -11,9 +16,21 @@ const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value
 }
 
-const handleSubmit = () => {
-  console.log('Datos enviados a NestJS:', form.value)
-  // Aquí iría axios.post()
+const handleSubmit = async () => {
+  try {
+    await authStore.login(form.value.email, form.value.password);
+
+    if (authStore.userRole === 'Admin') {
+      router.push({ name: 'admin-users' });
+    } else if (authStore.userRole === 'Estudiante') {
+      router.push({ name: 'student-home' });
+    } else {
+      router.push('/');
+    }
+  } catch (error) {
+    toast.error("Credenciales incorrectas.");
+    console.error('Error:', error);
+  }
 }
 </script>
 
@@ -77,11 +94,10 @@ const handleSubmit = () => {
 
       <p class="text-center text-base font-medium text-gray-400 mt-8">
         ¿No tienes cuenta?
-        <router-link to="/register" class="text-blue-500 hover:text-blue-400 font-semibold ml-1 transition-colors">
+        <router-link to="/registro" class="text-blue-500 hover:text-blue-400 font-semibold ml-1 transition-colors">
           Regístrate aquí
         </router-link>
       </p>
-
     </form>
   </div>
 </template>
