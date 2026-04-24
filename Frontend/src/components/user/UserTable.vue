@@ -2,10 +2,27 @@
 import { ref } from 'vue';
 
 const activeMenuId = ref(null);
-const users = ref([
-  { id: 1, nombre: 'Maria', apellido: 'Garcia', email: 'maria@example.com', role: 'Administrador', active: true },
-  // ... más datos
-]);
+const users = ref([]);
+const isLoading = ref(true);
+const fetchUsers = async () => {
+  try {
+    isLoading.value = true;
+    const response = await axios.get('http://localhost:3000/users', {
+      headerds: {
+        Authorization: `Brearer ${localStorage.getItem('token')}`
+      }
+    });
+    users.value = response.data;
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchUsers();
+});
 
 const toggleMenu = (id) => {
   activeMenuId.value = activeMenuId.value === id ? null : id;
