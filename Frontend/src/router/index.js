@@ -38,12 +38,12 @@ const routes = [
                 name: 'admin-reports',
                 component: () => import('@/views/Admin/ReportModerationView.vue'),
                 meta: { title: 'Moderación - Syshub Admin' }
-            },/*
+            },
             {
                 path: 'clasificacion',
                 name: 'admin-classification',
-                component: () => import('@/views/Admin/ClassificationView.vue'),
-            }*/
+                component: () => import('@/views/Admin/ClasificationView.vue'),
+            }
         ]
     },/*
     {
