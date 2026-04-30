@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { PublicationsService } from './publications.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
+import { VotePublicationDto } from './dto/vote-publication.dto';
 
 @Controller('publications')
 export class PublicationsController {
@@ -30,5 +31,10 @@ export class PublicationsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.publicationsService.remove(id);
+  }
+
+  @Patch(':id/vote')
+  async vote(@Param('id') id: string, @Body() voteDto: VotePublicationDto) {
+    return await this.publicationsService.vote(id, voteDto);
   }
 }

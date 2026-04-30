@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { TechnicalAreaService } from './technical-area.service';
 import { CreateTechnicalAreaDto } from './dto/create-technical-area.dto';
 import { UpdateTechnicalAreaDto } from './dto/update-technical-area.dto';
@@ -12,8 +12,8 @@ export class TechnicalAreaController {
   ) { }
 
   @Post()
-  create(@Body() createTechnicalAreaDto: CreateTechnicalAreaDto) {
-    return this.technicalAreaService.create(createTechnicalAreaDto);
+  create(@Body() createDto: CreateTechnicalAreaDto) {
+    return this.technicalAreaService.create(createDto);
   }
 
   @Get()
@@ -22,18 +22,18 @@ export class TechnicalAreaController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.technicalAreaService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.technicalAreaService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTechnicalAreaDto: UpdateTechnicalAreaDto) {
-    return this.technicalAreaService.update(+id, updateTechnicalAreaDto);
+    return this.technicalAreaService.update(id, updateTechnicalAreaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.technicalAreaService.remove(+id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.technicalAreaService.remove(id);
   }
 
   @Get('all-pensums')
