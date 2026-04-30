@@ -2,10 +2,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from "vue-toastification";
-import api from '../api/axios'
+import { useRouter } from 'vue-router';
+import api from '../api/axios';
 
 const authStore = useAuthStore();
 const toast = useToast();
+const router = useRouter();
 
 const threads = ref([]);
 const isLoading = ref(true);
@@ -23,21 +25,52 @@ const searchQuery = ref('');
 const activeTab = ref('Más Populares');
 const tabs = ['Más Populares', 'Recientes', 'Preguntas Técnicas'];
 
+const goToDetail = (id) => {
+  router.push({ name: 'publication-detail', params: { id } });
+};
+
+const hoveredThread = ref(null);
+
+const handleStarVote = async (id, stars) => {
+  try {
+    // Usamos PATCH directamente sobre el recurso de la publicación
+    // Enviamos el entero 'stars' para que el backend lo sume o lo asigne
+    const { data } = await api.patch(`/publications/${id}`, {
+      votes: stars
+    });
+
+    // Actualización reactiva en la lista
+    const thread = threads.value.find(t => t.id === id);
+    if (thread) {
+      // Si tu backend devuelve la publicación actualizada, tomamos el valor real
+      // Si no, lo actualizamos localmente para feedback inmediato
+      thread.votes = data.votes !== undefined ? data.votes : (thread.votes + stars);
+    }
+
+    toast.success(`Puntuación de ${stars} estrellas enviada`);
+  } catch (error) {
+    toast.error("No se pudo actualizar la puntuación en el servidor");
+    console.error("Error en PATCH:", error);
+  } finally {
+    hoveredThread.value = null;
+  }
+};
+
 const fetchPublications = async () => {
   isLoading.value = true;
   try {
     const { data } = await api.get('/publications');
-    // Mapeamos los campos del backend (PostgreSQL) a tu diseño de cards
+
     threads.value = data.map(pub => ({
       id: pub.id,
-      title: pub.titulo,
-      content: pub.contenido,
-      type: pub.tipo_contenido === 'foro' ? 'Pregunta Técnica' : 'Publicación',
-      cat1: pub.course?.nombre || 'General',
-      cat2: 'Sistemas',
-      creator: pub.user?.username || 'Usuario',
-      responses: pub.comments?.length || 0,
-      votes: pub.votos || 0,
+      title: pub.title,
+      content: pub.content || '',
+      type: pub.contentType === 'foro' ? 'Pregunta Técnica' : 'Publicación',
+      cat1: pub.tags?.[0]?.nameTag || 'General',
+      cat2: pub.tags?.length > 1 ? pub.tags[1].nameTag : 'Sistemas',
+      creator: pub.user ? `${pub.user.firstName} ${pub.user.lastName}` : 'Anónimo',
+      responses: pub.responsesCount || 0,
+      votes: pub.votes || 0,
       date: pub.createdAt
     }));
   } catch (error) {
@@ -54,17 +87,18 @@ onMounted(() => {
 const canModerate = computed(() => ['Admin', 'Moderador'].includes(authStore.userRole));
 
 const filteredThreads = computed(() => {
-  let list = threads.value.filter(t =>
+  let list = [...threads.value].filter(t =>
     t.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
     t.creator.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
+
   if (activeTab.value === 'Preguntas Técnicas') return list.filter(t => t.type === 'Pregunta Técnica');
   if (activeTab.value === 'Más Populares') return list.sort((a, b) => b.votes - a.votes);
   if (activeTab.value === 'Recientes') return list.sort((a, b) => new Date(b.date) - new Date(a.date));
+
   return list;
 });
 
-// 2. Enviar nueva publicación al backend
 const submitPost = async () => {
   if (!newPost.value.title || !newPost.value.content) {
     toast.error("Campos obligatorios incompletos");
@@ -74,35 +108,21 @@ const submitPost = async () => {
   isSubmitting.value = true;
   try {
     const payload = {
-      titulo: newPost.value.title,
-      contenido: newPost.value.content,
-      tipo_contenido: newPost.value.type === 'Pregunta Técnica' ? 'foro' : 'repositorio',
-      // idUsuario: authStore.userId // Si manejas el ID en el store
+      title: newPost.value.title,
+      content: newPost.value.content,
+      contentType: newPost.value.type === 'Pregunta Técnica' ? 'foro' : 'repositorio',
+      idUser: authStore.user?.id,
+      idCourse: "50ed1bde-8ac3-42c9-9222-4b1096afb06c",
     };
 
-    const { data } = await api.post('/publications', payload);
-
-    // Recargamos la lista para traer la data fresca con sus IDs de DB
+    await api.post('/publications', payload);
     await fetchPublications();
-
     toast.success("Publicación guardada en Syshub");
     closeModal();
   } catch (error) {
     toast.error("No se pudo guardar la publicación");
   } finally {
     isSubmitting.value = false;
-  }
-};
-
-const handleVote = async (id, delta) => {
-  try {
-    // Ejemplo de endpoint de votos: patch /publications/:id/vote
-    // await api.patch(`/publications/${id}/vote`, { delta });
-    const thread = threads.value.find(t => t.id === id);
-    if (thread) thread.votes += delta;
-    toast.info("Voto registrado");
-  } catch (error) {
-    toast.error("Error al votar");
   }
 };
 
@@ -115,6 +135,7 @@ const closeModal = () => {
 <template>
   <div class="p-6 bg-[#F8FAFC] min-h-screen relative">
 
+    <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Sys-Reddit</h1>
@@ -128,6 +149,7 @@ const closeModal = () => {
       </button>
     </div>
 
+    <!-- Modal para Nueva Publicación -->
     <Transition name="fade">
       <div v-if="showModal"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
@@ -187,6 +209,7 @@ const closeModal = () => {
       </div>
     </Transition>
 
+    <!-- Tabs y Barra de Búsqueda -->
     <div
       class="bg-white rounded-t-2xl border-x border-t border-gray-100 p-3 flex flex-wrap items-center justify-between gap-4 shadow-sm">
       <div class="flex bg-gray-50 p-1 rounded-xl">
@@ -208,6 +231,7 @@ const closeModal = () => {
       </div>
     </div>
 
+    <!-- Grid de Publicaciones -->
     <div class="bg-white border-x border-b border-gray-100 rounded-b-2xl p-6 shadow-sm">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="thread in filteredThreads" :key="thread.id"
@@ -225,7 +249,9 @@ const closeModal = () => {
             </span>
           </div>
 
-          <h3 class="font-bold text-gray-800 text-lg mb-4 leading-snug group-hover:text-blue-700 transition-colors">
+          <!-- Título con clic para ver detalle -->
+          <h3 @click="goToDetail(thread.id)"
+            class="font-bold text-gray-800 text-lg mb-4 leading-snug group-hover:text-blue-700 transition-colors cursor-pointer">
             {{ thread.title }}
           </h3>
 
@@ -243,6 +269,7 @@ const closeModal = () => {
             </div>
           </div>
 
+          <!-- Footer de la Card -->
           <div class="flex items-center justify-between pt-4 border-t border-gray-50">
             <div class="flex items-center gap-5">
               <div class="flex flex-col">
@@ -256,24 +283,45 @@ const closeModal = () => {
                 </div>
               </div>
 
-              <div class="flex flex-col items-center">
+              <div class="flex flex-col items-center relative">
                 <span class="text-[9px] font-bold text-gray-400 uppercase mb-1">Feedback</span>
-                <div class="flex items-center gap-3 text-gray-500">
-                  <div class="flex items-center gap-1">
+
+                <div @mouseenter="hoveredThread = thread.id" @mouseleave="hoveredThread = null"
+                  class="flex items-center gap-3 text-gray-500 relative">
+                  <!-- Comentarios -->
+                  <div @click="goToDetail(thread.id)"
+                    class="flex items-center gap-1 cursor-pointer hover:text-blue-600 transition-colors">
                     <i class="fas fa-comment-dots text-xs"></i>
                     <span class="text-xs font-bold">{{ thread.responses }}</span>
                   </div>
-                  <div class="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-md">
-                    <button @click.stop="handleVote(thread.id, 1)" class="hover:text-blue-600 transition-colors">
-                      <i class="fas fa-arrow-up text-xs"></i>
-                    </button>
+
+                  <!-- Sección de Puntuación -->
+                  <div class="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-md relative cursor-pointer group">
+                    <i class="fas fa-star text-[10px] text-yellow-500"></i>
                     <span class="text-xs font-bold text-gray-800">{{ thread.votes }}</span>
+
+                    <!-- Menú Flotante de Estrellas -->
+                    <Transition name="pop">
+                      <div v-if="hoveredThread === thread.id"
+                        class="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-white shadow-2xl border border-gray-100 rounded-full px-4 py-2 flex gap-1 z-50 stars-container">
+
+                        <button v-for="star in 5" :key="star" @click.stop="handleStarVote(thread.id, star)"
+                          class="star-btn text-gray-200 hover:text-yellow-400 transition-all transform hover:scale-125">
+                          <i class="fas fa-star text-sm"></i>
+                        </button>
+
+                        <div
+                          class="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-white">
+                        </div>
+                      </div>
+                    </Transition>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- Opciones de Moderación -->
           <div v-if="canModerate" class="mt-4 flex gap-2 pt-4 border-t border-dashed border-gray-100">
             <button
               class="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors uppercase">
@@ -285,6 +333,12 @@ const closeModal = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-if="!isLoading && filteredThreads.length === 0" class="text-center py-20">
+        <i class="fas fa-folder-open text-gray-200 text-5xl mb-4"></i>
+        <p class="text-gray-400 font-medium">No se encontraron hilos técnicos.</p>
       </div>
     </div>
   </div>

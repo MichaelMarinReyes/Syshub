@@ -88,6 +88,12 @@ const routes = [
                 name: 'mod-articles',
                 component: () => import('@/views/moderator/ArticlesModView.vue'),
                 meta: { title: 'Gestión de Artículos - Moderación' }
+            },
+            {
+                path: '/publication/:id',
+                name: 'publication-detail',
+                component: () => import('@/views/publications/PublicationDetail.vue'),
+                props: true
             }
         ]
     }
