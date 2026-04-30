@@ -20,7 +20,6 @@ const menuConfig = {
   Moderador: [
     { name: 'Cola de Reportes', to: '/moderador/reportes', icon: 'fa-flag' },
     { name: 'Revisión', to: '/moderador/revision', icon: 'fa-clock' },
-    { name: 'Foros', to: '/moderador/foros', icon: 'fa-comments' },
     { name: 'Artículos', to: '/moderador/articulos', icon: 'fa-file-alt' },
   ],/*
   Estudiante: [

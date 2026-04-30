@@ -44,10 +44,12 @@ export class PublicationsService {
       where: { id: id as any },
       relations: [
         'user',
+        'user.role',
         'course',
         'tags',
         'comments',
-        'comments.user'
+        'comments.user',
+        'comments.user.role'
       ]
     });
 

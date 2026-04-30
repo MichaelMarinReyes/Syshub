@@ -30,9 +30,9 @@ export class Publication {
     idCourse: string;
 
     @ManyToOne(() => Course)
-    @JoinColumn({ name: 'id_curso' })
+    @JoinColumn({ name: 'id_curso'})
     course: Course;
-
+    
     @OneToMany(() => Report, (report) => report.publication)
     reports: Report[];
 
