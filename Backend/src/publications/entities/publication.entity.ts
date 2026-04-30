@@ -3,6 +3,7 @@ import { User } from "@/users/entities/user.entity";
 import { Comment } from "@/comments/entities/comment.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Label } from "@/labels/entities/label.entity";
+import { Course } from "@/course/entities/course.entity";
 
 @Entity('publicaciones')
 export class Publication {
@@ -27,6 +28,10 @@ export class Publication {
 
     @Column({ name: 'id_curso', type: 'uuid', nullable: true })
     idCourse: string;
+
+    @ManyToOne(() => Course)
+    @JoinColumn({ name: 'id_curso' })
+    course: Course;
 
     @OneToMany(() => Report, (report) => report.publication)
     reports: Report[];

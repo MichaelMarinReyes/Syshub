@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Publication } from './entities/publication.entity';
 import { In, Repository } from 'typeorm';
 import { Label } from '@/labels/entities/label.entity';
+import { VotePublicationDto } from './dto/vote-publication.dto';
 
 @Injectable()
 export class PublicationsService {
@@ -40,8 +41,14 @@ export class PublicationsService {
 
   async findOne(id: string): Promise<Publication> {
     const publication = await this.publicationRepository.findOne({
-      where: { id },
-      relations: ['tags', 'user', 'course'],
+      where: { id: id as any },
+      relations: [
+        'user',
+        'course',
+        'tags',
+        'comments',
+        'comments.user'
+      ]
     });
 
     if (!publication) {
@@ -78,5 +85,27 @@ export class PublicationsService {
     await this.publicationRepository.remove(publication);
 
     return { deleted: true };
+  }
+
+  async vote(id: string, voteDto: VotePublicationDto): Promise<{ message: string; currentVotes: number }> {
+    const publication = await this.publicationRepository.findOne({ where: { id } });
+
+    if (!publication) {
+      throw new NotFoundException(`No se encontró la publicación para puntuar`);
+    }
+
+    // Cambiar el votes por el nombre de la columna
+    await this.publicationRepository.increment({ id }, 'votes', voteDto.stars);
+/*
+    const updatedPublication = await this.publicationRepository.findOne({
+      where: { id },
+      select: ['id', 'votes']
+    });*/
+
+    return {
+      message: `Has puntuado con ${voteDto.stars} estrellas`,
+      //currentVotes: updatedPublication.votes,
+      currentVotes: 0
+    };
   }
 }

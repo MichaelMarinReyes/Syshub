@@ -19,16 +19,16 @@ export class PensumController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.pensumService.findOne(+id);
+    return this.pensumService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePensumDto: UpdatePensumDto) {
-    return this.pensumService.update(+id, updatePensumDto);
+    return this.pensumService.update(id, updatePensumDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.pensumService.remove(+id);
+    return this.pensumService.remove(id);
   }
 }

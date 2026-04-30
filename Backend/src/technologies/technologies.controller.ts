@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { TechnologiesService } from './technologies.service';
 import { CreateTechnologyDto } from './dto/create-technology.dto';
 import { UpdateTechnologyDto } from './dto/update-technology.dto';
@@ -7,28 +7,28 @@ import { UpdateTechnologyDto } from './dto/update-technology.dto';
 export class TechnologiesController {
   constructor(private readonly technologiesService: TechnologiesService) {}
 
-  @Post()
-  create(@Body() createTechnologyDto: CreateTechnologyDto) {
-    return this.technologiesService.create(createTechnologyDto);
-  }
+ @Post()
+    create(@Body() createDto: CreateTechnologyDto) {
+        return this.technologiesService.create(createDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.technologiesService.findAll();
-  }
+    @Get()
+    findAll() {
+        return this.technologiesService.findAll();
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.technologiesService.findOne(+id);
-  }
+    @Get(':id')
+    findOne(@Param('id', ParseUUIDPipe) id: string) {
+        return this.technologiesService.findOne(id);
+    }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTechnologyDto: UpdateTechnologyDto) {
-    return this.technologiesService.update(+id, updateTechnologyDto);
+    return this.technologiesService.update(id, updateTechnologyDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.technologiesService.remove(+id);
+    return this.technologiesService.remove(id);
   }
 }

@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { TechnologyProjectService } from './technology_project.service';
 import { CreateTechnologyProjectDto } from './dto/create-technology_project.dto';
 import { UpdateTechnologyProjectDto } from './dto/update-technology_project.dto';
 
 @Controller('technology-project')
 export class TechnologyProjectController {
-  constructor(private readonly technologyProjectService: TechnologyProjectService) {}
+  constructor(private readonly technologyProjectService: TechnologyProjectService) { }
 
   @Post()
   create(@Body() createTechnologyProjectDto: CreateTechnologyProjectDto) {
@@ -18,17 +18,19 @@ export class TechnologyProjectController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.technologyProjectService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.technologyProjectService.findByOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTechnologyProjectDto: UpdateTechnologyProjectDto) {
-    return this.technologyProjectService.update(+id, updateTechnologyProjectDto);
+    return this.technologyProjectService.update(id, updateTechnologyProjectDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.technologyProjectService.remove(+id);
+  remove(@Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('technologyId', ParseUUIDPipe) technologyId: string
+  ) {
+    return this.technologyProjectService.remove(projectId, technologyId);
   }
 }

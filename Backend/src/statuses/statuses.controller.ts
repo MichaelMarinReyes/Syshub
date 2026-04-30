@@ -19,16 +19,16 @@ export class StatusesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.statusesService.findOne(+id);
+    return this.statusesService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStatusDto: UpdateStatusDto) {
-    return this.statusesService.update(+id, updateStatusDto);
+    return this.statusesService.update(id, updateStatusDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.statusesService.remove(+id);
+    return this.statusesService.remove(id);
   }
 }

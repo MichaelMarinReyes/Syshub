@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { PostForumsService } from './post_forums.service';
 import { CreatePostForumDto } from './dto/create-post_forum.dto';
 import { UpdatePostForumDto } from './dto/update-post_forum.dto';
 
 @Controller('post-forums')
 export class PostForumsController {
-  constructor(private readonly postForumsService: PostForumsService) {}
+  constructor(private readonly postForumsService: PostForumsService) { }
 
   @Post()
   create(@Body() createPostForumDto: CreatePostForumDto) {
@@ -19,16 +19,19 @@ export class PostForumsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.postForumsService.findOne(+id);
+    return this.postForumsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostForumDto: UpdatePostForumDto) {
-    return this.postForumsService.update(+id, updatePostForumDto);
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('status') status: string
+  ) {
+    return this.postForumsService.updateStatus(id, status);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.postForumsService.remove(+id);
+    return this.postForumsService.remove(id);
   }
 }
