@@ -19,8 +19,9 @@ import { PostForumsModule } from './post_forums/post_forums.module';
 import { TechnologyProjectModule } from './technology_project/technology_project.module';
 import { ProjectsModule } from './projects/projects.module';
 import { SessionsModule } from './sessions/sessions.module';
-import { TagPublicationsModule } from './tag_publications/tag_publications.module';
 import { TechnologiesModule } from './technologies/technologies.module';
+import { Publication } from './publications/entities/publication.entity';
+import { Label } from './labels/entities/label.entity';
 
 @Module({
   imports: [
@@ -53,7 +54,6 @@ import { TechnologiesModule } from './technologies/technologies.module';
     TechnologyProjectModule,
     ProjectsModule,
     SessionsModule,
-    TagPublicationsModule,
     TechnologiesModule,
   ],
   controllers: [AppController],

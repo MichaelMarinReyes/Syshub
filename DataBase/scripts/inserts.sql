@@ -8,6 +8,11 @@ DELETE FROM area_tecnica;
 DELETE FROM pensum;
 DELETE FROM etiquetas;
 DELETE FROM tecnologias;
+DELETE FROM tag_publicaciones;
+DELETE FROM reportes;
+DELETE FROM comentarios;
+DELETE FROM posts_foros;
+DELETE FROM publicaciones;
 
 INSERT INTO estados (nombre_estado) VALUES 
 ('Activo'),
@@ -48,85 +53,50 @@ VALUES
     (SELECT id_estado FROM estados WHERE nombre_estado = 'Activo'), NOW()
 );
 
+-- 3. CLASIFICACIÓN SISTÉMICA
 INSERT INTO area_tecnica (nombre_area) VALUES 
-('Ciencias de la Computación'),
-('Sistemas y Organización'),
-('Infraestructura y Redes'),
-('Desarrollo de Software');
+('Desarrollo'), ('IA'), ('Infraestructura'), ('Sistemas y Organización'), ('Ciencias de la Computación');
 
--- 3. PENSUM
 INSERT INTO pensum (codigo_pensum, anio_vigencia) VALUES 
-('P2023', 2023),
-('P2026', 2026);
+('P2023', 2023), ('P2026', 2026);
 
--- 4. CURSOS (Garantizamos un solo registro por subconsulta)
 INSERT INTO cursos (nombre_curso, id_area, id_pensum) VALUES 
-(
-    'Sistemas Operativos 1', 
-    (SELECT id_area FROM area_tecnica WHERE nombre_area = 'Infraestructura y Redes' LIMIT 1), 
-    (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2023' LIMIT 1)
-),
-(
-    'Teoría de Sistemas 1', 
-    (SELECT id_area FROM area_tecnica WHERE nombre_area = 'Sistemas y Organización' LIMIT 1), 
-    (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2023' LIMIT 1)
-);
+('Sistemas Operativos 1', (SELECT id_area FROM area_tecnica WHERE nombre_area = 'Infraestructura' LIMIT 1), (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2023' LIMIT 1)),
+('Teoría de Sistemas 1', (SELECT id_area FROM area_tecnica WHERE nombre_area = 'Sistemas y Organización' LIMIT 1), (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2023' LIMIT 1)),
+('Inteligencia Artificial 1', (SELECT id_area FROM area_tecnica WHERE nombre_area = 'IA' LIMIT 1), (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2026' LIMIT 1));
 
--- 5. ETIQUETAS Y TECNOLOGÍAS
+-- 4. ETIQUETAS
 INSERT INTO etiquetas (nombre_tag) VALUES 
-('IA'), ('Debian'), ('Networking'), ('SCRUM'), ('Base de Datos'), ('Backend');
+('IA'), ('Debian'), ('Networking'), ('Base de Datos'), ('Backend'), ('Infraestructura'),
+('Tutorial'), ('Investigación'), ('Proyecto'), ('Tarea'), ('Solución Técnica'), ('Hallazgo'), ('Clase Grabada');
 
+-- 5. TECNOLOGÍAS
 INSERT INTO tecnologias (nombre_tecnologia, categoria) VALUES 
 ('Vue.js', 'Frontend'), ('NestJS', 'Backend'), ('PostgreSQL', 'Base de Datos'), 
-('Docker', 'DevOps'), ('C', 'Lenguaje'), ('Arduino', 'Hardware');
+('Docker', 'DevOps'), ('C', 'Lenguaje'), ('Arduino', 'Hardware'),
+('TypeScript', 'Lenguaje'), ('Python', 'IA/Lenguaje');
 
--- 6. HILO 1: PREGUNTA TÉCNICA (Sys-Reddit)
+-- 6. DATOS DE PRUEBA (PUBLICACIONES Y RELACIONES)
+WITH repo1 AS (
+    INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido)
+    VALUES ('Ecosistema Syshub - Análisis Fase 1', (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), (SELECT id_curso FROM cursos WHERE nombre_curso = 'Teoría de Sistemas 1' LIMIT 1), 'repositorio')
+    RETURNING id_publicacion
+)
+INSERT INTO tag_publicaciones (id_publicacion, id_etiqueta)
+SELECT id_publicacion, (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Proyecto' LIMIT 1) FROM repo1;
+
 WITH post1 AS (
     INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido)
-    VALUES ('¿Cómo configurar OSPF en Debian 12?', 
-    (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), 
-    (SELECT id_curso FROM cursos WHERE nombre_curso = 'Sistemas Operativos 1' LIMIT 1), 
-    'foro')
+    VALUES ('¿Cómo configurar OSPF en Debian 12?', (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), (SELECT id_curso FROM cursos WHERE nombre_curso = 'Sistemas Operativos 1' LIMIT 1), 'foro')
     RETURNING id_publicacion
 )
 INSERT INTO posts_foros (id_publicacion, es_pregunta_tecnica, estado_resolucion)
 SELECT id_publicacion, true, 'abierto' FROM post1;
 
--- 7. HILO 2: PUBLICACIÓN DE INTERÉS
-WITH post2 AS (
-    INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido)
-    VALUES ('Mejores extensiones de VS Code para C', 
-    (SELECT id_usuario FROM usuarios WHERE correo = 'estudiante@syshub.com' LIMIT 1), 
-    NULL, 'foro')
-    RETURNING id_publicacion
-)
-INSERT INTO posts_foros (id_publicacion, es_pregunta_tecnica, estado_resolucion)
-SELECT id_publicacion, false, 'abierto' FROM post2;
-
--- 8. RELACIÓN DE ETIQUETAS
 INSERT INTO tag_publicaciones (id_publicacion, id_etiqueta) VALUES 
-(
-    (SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), 
-    (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Debian' LIMIT 1)
-),
-(
-    (SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), 
-    (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Networking' LIMIT 1)
-);
+((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Debian' LIMIT 1)),
+((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Networking' LIMIT 1)),
+((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Solución Técnica' LIMIT 1));
 
--- 9. COMENTARIOS Y REPORTES
 INSERT INTO comentarios (id_publicacion, id_usuario, contenido, puntuacion_calidad) VALUES 
-(
-    (SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1),
-    (SELECT id_usuario FROM usuarios WHERE correo = 'moderador@syshub.com' LIMIT 1),
-    'Excelente pregunta, asegúrate de instalar el paquete quagga o frr.',
-    10
-);
-
-INSERT INTO reportes (id_publicacion, id_usuario_reporta, motivo_denuncia, estado_resolucion) VALUES 
-(
-    (SELECT id_publicacion FROM publicaciones WHERE titulo = 'Mejores extensiones de VS Code para C' LIMIT 1),
-    (SELECT id_usuario FROM usuarios WHERE correo = 'moderador@syshub.com' LIMIT 1),
-    'Spam o contenido irrelevante',
-    'pendiente'
-);
+((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_usuario FROM usuarios WHERE correo = 'auxiliar@syshub.com' LIMIT 1), 'Excelente duda. Como tip: revisen el archivo de configuración en /etc/frr/frr.conf.', 10);
