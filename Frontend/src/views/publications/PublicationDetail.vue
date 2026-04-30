@@ -1,64 +1,69 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import { useToast } from "vue-toastification";
 import api from '../../api/axios';
 
 const route = useRoute();
+const authStore = useAuthStore();
+const toast = useToast();
+
 const publication = ref(null);
 const comments = ref([]);
 const newComment = ref('');
+const ratedComments = ref(new Set());
 
 const fetchDetail = async () => {
   try {
     const { data } = await api.get(`/publications/${route.params.id}`);
-
-    publication.value = { ...data };
-
+    publication.value = data;
+    
     comments.value = data.comments.map(comment => ({
       ...comment,
       user: {
         ...comment.user,
-        role: comment.user.role || { name: 'Sin Rol' }
+        role: comment.user?.role || { name: 'Estudiante' }
       }
     }));
   } catch (error) {
-    console.error("Error cargando detalle");
+    toast.error("Error al cargar los detalles de la publicación");
   }
 };
 
 const postComment = async () => {
   if (!newComment.value.trim()) return;
+  
   try {
-    await api.post('/comments', {
+    const payload = {
       content: newComment.value,
-      idPublication: route.params.id
-    });
+      idPublication: route.params.id,
+      idUser: authStore.user?.id
+    };
+    console.log(payload)
+    await api.post('/comments', payload);
     newComment.value = '';
-    fetchDetail();
+    await fetchDetail();
+    toast.success("Comentario publicado");
   } catch (error) {
-    console.error("Error al publicar comentario");
+    const msg = error.response?.data?.message || "Error al comentar";
+    toast.error(Array.isArray(msg) ? msg[0] : msg);
   }
 };
-
-const ratedComments = ref(new Set());
 
 const rateComment = async (commentId, score) => {
   if (ratedComments.value.has(commentId)) return;
 
-  const finalScore = Math.min(score, 10);
-
   try {
     await api.patch(`/comments/${commentId}/rate`, {
-      qualityScore: finalScore
+      qualityScore: score
     });
 
     ratedComments.value.add(commentId);
-    toast?.success(`Puntuado con ${finalScore} puntos`);
-
-    fetchDetail();
+    toast.success(`Puntuación de ${score} registrada`);
+    await fetchDetail();
   } catch (error) {
-    console.error("Error al puntuar:", error);
-    toast?.error("No se pudo registrar la puntuación");
+    toast.error("No se pudo calificar el comentario");
   }
 };
 
