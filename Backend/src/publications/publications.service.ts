@@ -40,8 +40,14 @@ export class PublicationsService {
 
   async findOne(id: string): Promise<Publication> {
     const publication = await this.publicationRepository.findOne({
-      where: { id },
-      relations: ['tags', 'user', 'course'],
+      where: { id: id as any },
+      relations: [
+        'user',
+        'course',
+        'tags',
+        'comments',
+        'comments.user'
+      ]
     });
 
     if (!publication) {
