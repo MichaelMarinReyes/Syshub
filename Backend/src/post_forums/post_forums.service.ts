@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostForumDto } from './dto/create-post_forum.dto';
 import { UpdatePostForumDto } from './dto/update-post_forum.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PostForum } from './entities/post_forum.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PostForumsService {
-  create(createPostForumDto: CreatePostForumDto) {
-    return 'This action adds a new postForum';
-  }
+  constructor(@InjectRepository(PostForum) private readonly postForumRepository: Repository<PostForum>) {}
 
-  findAll() {
-    return `This action returns all postForums`;
-  }
+  async create(createDto: CreatePostForumDto): Promise<PostForum> {
+        const newPost = this.postForumRepository.create({
+            id: createDto.idPublication,
+            isTechnicalQuestion: createDto.isTechnicalQuestion,
+            resolutionStatus: createDto.resolutionStatus
+        });
+        return await this.postForumRepository.save(newPost);
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} postForum`;
-  }
+    async findAll(): Promise<PostForum[]> {
+        return await this.postForumRepository.find({
+            relations: ['publication', 'publication.user']
+        });
+    }
 
-  update(id: number, updatePostForumDto: UpdatePostForumDto) {
-    return `This action updates a #${id} postForum`;
-  }
+    async findOne(id: string): Promise<PostForum> {
+        const post = await this.postForumRepository.findOne({
+            where: { id },
+            relations: ['publication', 'publication.user', 'publication.tags']
+        });
 
-  remove(id: number) {
+        if (!post) throw new NotFoundException('Post de foro no encontrado');
+        return post;
+    }
+
+    async updateStatus(id: string, status: string): Promise<PostForum> {
+        const post = await this.findOne(id);
+        post.resolutionStatus = status;
+        return await this.postForumRepository.save(post);
+    }
+
+  remove(id: string) {
     return `This action removes a #${id} postForum`;
   }
 }

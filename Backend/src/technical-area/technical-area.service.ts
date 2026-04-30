@@ -1,26 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTechnicalAreaDto } from './dto/create-technical-area.dto';
 import { UpdateTechnicalAreaDto } from './dto/update-technical-area.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TechnicalArea } from './entities/technical-area.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TechnicalAreaService {
-  create(createTechnicalAreaDto: CreateTechnicalAreaDto) {
-    return 'This action adds a new technicalArea';
+  constructor(@InjectRepository(TechnicalArea) private readonly technicalAreaRepository: Repository<TechnicalArea>) { }
+
+  async create(createDto: CreateTechnicalAreaDto): Promise<TechnicalArea> {
+    const existingArea = await this.technicalAreaRepository.findOne({
+      where: { name: createDto.name }
+    });
+
+    if (existingArea) {
+      throw new ConflictException(`El área '${createDto.name}' ya existe`);
+    }
+
+    const newArea = this.technicalAreaRepository.create(createDto);
+    return await this.technicalAreaRepository.save(newArea);
   }
 
-  findAll() {
-    return `This action returns all technicalArea`;
+  async findAll(): Promise<TechnicalArea[]> {
+    return await this.technicalAreaRepository.find({
+      relations: ['courses'],
+      order: { name: 'ASC' }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} technicalArea`;
+  async findOne(id: string): Promise<TechnicalArea> {
+    const area = await this.technicalAreaRepository.findOne({
+      where: { id },
+      relations: ['courses']
+    });
+
+    if (!area) throw new NotFoundException(`Área técnica con ID ${id} no encontrada`);
+    return area;
   }
 
-  update(id: number, updateTechnicalAreaDto: UpdateTechnicalAreaDto) {
+  update(id: string, updateTechnicalAreaDto: UpdateTechnicalAreaDto) {
     return `This action updates a #${id} technicalArea`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} technicalArea`;
+  async remove(id: string): Promise<void> {
+    const area = await this.findOne(id);
+    await this.technicalAreaRepository.remove(area);
   }
 }
