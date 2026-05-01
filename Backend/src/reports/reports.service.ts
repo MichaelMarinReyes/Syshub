@@ -10,11 +10,17 @@ export class ReportsService {
   constructor(
     @InjectRepository(Report)
     private readonly reportRepository: Repository<Report>,
-  ) {}
+  ) { }
 
-  async create(createReportDto: CreateReportDto) {
-    const newReport = this.reportRepository.create(createReportDto);
-    return await this.reportRepository.save(newReport)
+  async create(createReportDto: CreateReportDto): Promise<Report> {
+    const newReport = this.reportRepository.create({
+      idPublication: createReportDto.idPublication,
+      idUserReport: createReportDto.idUserReport,
+      reasonComplaint: createReportDto.reasonComplaint,
+      resolutionStatus: 'pendiente'
+    });
+
+    return await this.reportRepository.save(newReport);
   }
 
   async findAll() {
