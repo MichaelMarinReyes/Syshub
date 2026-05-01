@@ -1,3 +1,4 @@
+import { Publication } from '@/publications/entities/publication.entity';
 import { User } from '@/users/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
@@ -11,4 +12,7 @@ export class Status {
 
     @OneToMany(() => User, (user) => user.status)
     users!: User[]
+
+    @OneToMany(() => Publication, (publication) => publication.status)
+    publications!: Publication[];
 }
