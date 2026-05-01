@@ -10,93 +10,100 @@ import { UpdateBlogArticleDto } from './dto/update-blog_article.dto';
 export class BlogArticlesService {
   constructor(
     @InjectRepository(BlogArticle)
-    private readonly blogRepo: Repository<BlogArticle>,
+    private readonly repositorioBlog: Repository<BlogArticle>,
     @InjectRepository(Publication)
-    private readonly publicacionesRepo: Repository<Publication>,
+    private readonly repositorioPub: Repository<Publication>,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
-  async create(createBlogDto: CreateBlogArticleDto) {
+  async create(dto: CreateBlogArticleDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const nuevaPublicacion = queryRunner.manager.create(Publication, {
-        title: createBlogDto.title,
-        idUser: createBlogDto.idUsuario,
-        idCourse: createBlogDto.idCurso,
-        contentType: 'articulo',
-      });
-      const savedPublicacion = await queryRunner.manager.save(nuevaPublicacion);
+      const newPublication = queryRunner.manager.create(Publication, {
+        title: dto.title,
+        idUser: dto.idUsuario,
+        idCourse: dto.idCurso || undefined,
+        contentType: 'blog'
+      } as Publication);
+      const pubSave = await queryRunner.manager.save(newPublication);
 
-      const articulo = queryRunner.manager.create(BlogArticle, {
-        idPublication: savedPublicacion.id,
-        body: createBlogDto.body,
-        urlImage: createBlogDto.urlImage,
+      const newArticle = queryRunner.manager.create(BlogArticle, {
+        idPublication: pubSave.id,
+        body: dto.body,
+        urlImage: dto.urlImage
       });
-      const savedArticulo = await queryRunner.manager.save(articulo);
 
+      const result = await queryRunner.manager.save(newArticle);
       await queryRunner.commitTransaction();
-      return { ...savedPublicacion, ...savedArticulo };
+      return result;
     } catch (error) {
+      console.log(error)
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('Error al crear el artículo de blog');
+      throw new InternalServerErrorException('Error al crear el artículo en el servidor');
     } finally {
       await queryRunner.release();
     }
   }
 
   async findAll() {
-    return await this.blogRepo.find({
-      relations: ['publicacion', 'publicacion.usuario'],
-      order: { publication: { createdAt: 'DESC' } }
+    return await this.repositorioBlog.find({
+      relations: ['publication', 'publication.user'],
+      order: {
+        publication: { createdAt: 'DESC' }
+      }
     });
   }
 
   async findOne(id: string) {
-    const articulo = await this.blogRepo.findOne({
+    const articulo = await this.repositorioBlog.findOne({
       where: { idPublication: id },
-      relations: ['publicacion', 'publicacion.usuario', 'publicacion.comentarios'],
+      relations: ['publication', 'publication.user', 'publication.comments'],
     });
 
-    if (!articulo) throw new NotFoundException(`Artículo con ID ${id} no encontrado`);
+    if (!articulo) {
+      throw new NotFoundException(`El artículo con ID ${id} no existe`);
+    }
     return articulo;
   }
 
-  async update(id: string, updateBlogDto: UpdateBlogArticleDto) {
-    const articulo = await this.findOne(id);
+  async update(id: string, updateDto: UpdateBlogArticleDto) {
+    await this.findOne(id);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      if (updateBlogDto.title || updateBlogDto.idCurso) {
+      if (updateDto.title || updateDto.idCurso) {
         await queryRunner.manager.update(Publication, id, {
-          title: updateBlogDto.title,
-          idCourse: updateBlogDto.idCurso,
+          title: updateDto.title,
+          idCourse: updateDto.idCurso,
         });
       }
 
       await queryRunner.manager.update(BlogArticle, id, {
-        body: updateBlogDto.body,
-        urlImage: updateBlogDto.urlImage,
+        body: updateDto.body,
+        urlImage: updateDto.urlImage,
       });
 
       await queryRunner.commitTransaction();
       return this.findOne(id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('Error al actualizar el artículo');
+      throw new InternalServerErrorException('Error al intentar actualizar el recurso');
     } finally {
       await queryRunner.release();
     }
   }
 
   async remove(id: string) {
-    const result = await this.publicacionesRepo.delete(id);
-    if (result.affected === 0) throw new NotFoundException(`No se pudo eliminar el artículo ${id}`);
-    return { deleted: true };
+    const result = await this.repositorioPub.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`No se encontró el artículo ${id} para eliminar`);
+    }
+    return { mensaje: 'Artículo eliminado exitosamente', id };
   }
 }

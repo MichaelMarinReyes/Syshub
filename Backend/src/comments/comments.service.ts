@@ -12,9 +12,24 @@ export class CommentsService {
     private readonly commentRepository: Repository<Comment>,
   ) { }
 
-  async create(createCommentDto: CreateCommentDto): Promise<Comment> {
-    const newComment = this.commentRepository.create(createCommentDto);
-    return await this.commentRepository.save(newComment);
+  async create(createCommentDto: CreateCommentDto) {
+    try {
+      const result = await this.commentRepository.insert({
+        content: createCommentDto.content,
+        qualityScore: 0,
+        publication: { id: createCommentDto.idPublication } as any,
+        user: { id: createCommentDto.idUser } as any,
+      });
+
+      return {
+        idComment: result.identifiers[0].idComment,
+        ...createCommentDto,
+        qualityScore: 0
+      };
+    } catch (error) {
+      console.error("Error al persistir el comentario en la DB:", error);
+      throw error;
+    }
   }
 
   async findAll() {
@@ -40,8 +55,11 @@ export class CommentsService {
   async update(id: string, updateCommentDto: UpdateCommentDto): Promise<Comment> {
     const comment = await this.findOne(id);
 
-    this.commentRepository.merge(comment, updateCommentDto);
+    if (Object.keys(updateCommentDto).length === 0) {
+      return comment;
+    }
 
+    this.commentRepository.merge(comment, updateCommentDto);
     return await this.commentRepository.save(comment);
   }
 
@@ -59,5 +77,12 @@ export class CommentsService {
       relations: ['user'],
       order: { qualityScore: 'DESC' },
     });
+  }
+
+  async rate(id: string, score: number): Promise<Comment> {
+    const comment = await this.findOne(id);
+    comment.qualityScore = score;
+
+    return await this.commentRepository.save(comment);
   }
 }
