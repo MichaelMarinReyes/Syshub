@@ -1,6 +1,6 @@
 import { Publication } from '@/publications/entities/publication.entity';
 import { User } from '@/users/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity('estados')
 export class Status {

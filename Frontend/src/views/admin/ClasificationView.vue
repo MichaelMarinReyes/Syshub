@@ -6,7 +6,6 @@ import { useToast } from "vue-toastification";
 const toast = useToast();
 const isLoading = ref(false);
 
-// Estructura de datos para las tres columnas de la imagen
 const classificationData = ref({
   categoriasCurso: [
     { id: 1, name: 'Desarrollo', count: 1 },

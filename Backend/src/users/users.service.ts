@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
 import { Role } from '@/roles/entities/role.entity';
 import { Status } from '@/statuses/entities/status.entity';
@@ -91,5 +91,45 @@ export class UsersService {
   async remove(id: string) {
     const user = await this.findOne(id);
     return await this.userRepository.remove(user);
+  }
+
+  async updateUserRole(userId: string, roleId: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role']
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    const newRole = await this.roleRepository.findOne({ where: { id: roleId } });
+    if (!newRole) {
+      throw new NotFoundException(`El rol con ID ${roleId} no existe`);
+    }
+
+    user.role = newRole;
+    return await this.userRepository.save(user);
+  }
+
+  async updateUserStatus(userId: string, statusId: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['status']
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuario no encontrado`);
+    }
+
+    const targetStatus = await this.statusRepository.findOne({
+      where: { id: statusId }
+    });
+    if (!targetStatus) {
+      throw new NotFoundException(`El estado '${statusId}' no existe en la base de datos`);
+    }
+
+    user.status = targetStatus;
+    return await this.userRepository.save(user);
   }
 }

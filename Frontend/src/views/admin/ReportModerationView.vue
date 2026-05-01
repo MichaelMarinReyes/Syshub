@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 
-// Mock de datos (aquí usarías tu CourseService para traer los reportes)
 const reports = ref([
   { id: 1, user: 'Syshub', type: 'Desarrollo', content: 'Contenido inapropiado que incluye lenguaje ofensivo...', date: '2022-01-12', priority: 'high' },
   { id: 2, user: 'Syshub', type: 'Posts', content: 'Información errónea sobre temas sensibles', date: '2022-01-12', priority: 'medium' },
