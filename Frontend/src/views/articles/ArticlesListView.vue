@@ -1,41 +1,69 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from "vue-toastification";
-import api from '@/api/axios'; 
+import api from '@/api/axios';
+import { useAuthStore } from '../../stores/auth';
 
 const router = useRouter();
 const toast = useToast();
+const authStore = useAuthStore();
 
 const articles = ref([]);
 const isLoading = ref(true);
+const searchQuery = ref("");
+const activeTab = ref('all');
+
+// --- Lógica de Permisos Globales ---
+const canModerate = computed(() => {
+  const role = (typeof authStore.user?.role === 'object' ? authStore.user?.role?.nombre : authStore.user?.role)?.toLowerCase();
+  return role === 'admin' || role === 'moderador';
+});
+
+const filteredArticles = computed(() => {
+  let list = articles.value;
+
+  if (activeTab.value === 'mine') {
+    list = list.filter(art => art.publication?.idUser === authStore.user?.id);
+  }
+
+  const query = searchQuery.value.toLowerCase().trim();
+  if (!query) return list;
+
+  return list.filter(art => {
+    const title = art.publication?.title?.toLowerCase() || '';
+    const author = `${art.publication?.user?.firstName} ${art.publication?.user?.lastName}`.toLowerCase();
+    return title.includes(query) || author.includes(query);
+  });
+});
 
 const fetchArticles = async () => {
-  isLoading.ref = true;
+  isLoading.value = true;
   try {
-    const response = await api.get('/blog-articles'); 
+    const response = await api.get('/blog-articles');
     articles.value = response.data;
-    
   } catch (error) {
-    toast.error("Error al cargar los artículos del servidor");
-    console.error(error);
+    toast.error("Error al cargar los artículos");
   } finally {
     isLoading.value = false;
   }
 };
 
-onMounted(() => {
-  fetchArticles();
-});
-
-const goToCreate = () => {
-  router.push({ name: 'ArticleCreate' }); 
+const deleteArticle = async (id) => {
+  if (!confirm("¿Eliminar permanentemente?")) return;
+  try {
+    await api.delete(`/blog-articles/${id}`);
+    articles.value = articles.value.filter(a => a.idPublication !== id);
+    toast.success("Eliminado con éxito");
+  } catch (error) {
+    toast.error("Error al eliminar");
+  }
 };
 
-const goToReader = (id) => {
-  router.push({ name: 'ArticleReader', params: { id } });
-};
+onMounted(fetchArticles);
 
+const goToCreate = () => router.push({ name: 'ArticleCreate' });
+const goToReader = (id) => router.push({ name: 'ArticleReader', params: { id } });
 const goToEdit = (event, id) => {
   event.stopPropagation();
   router.push({ name: 'ArticleEdit', params: { id } });
@@ -43,61 +71,100 @@ const goToEdit = (event, id) => {
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Artículos</h2>
-      <button 
-        @click="goToCreate"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
-        <i class="fas fa-plus"></i> Nuevo Artículo
+  <div class="max-w-5xl mx-auto p-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight text-center sm:text-left">
+        Explora Artículos
+      </h2>
+      <button @click="goToCreate"
+        class="w-full md:w-auto bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-sm transition-all active:scale-95">
+        <i class="fas fa-plus mr-2"></i> Nuevo Artículo
       </button>
     </div>
 
-    <!-- Estado de Carga -->
-    <div v-if="isLoading" class="flex justify-center py-12">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <!-- Barra de Búsqueda y Navegación de Pestañas -->
+    <div class="space-y-6 mb-8">
+      <div class="relative group">
+        <input v-model="searchQuery" type="text" placeholder="Buscar título o autor..."
+          class="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all shadow-sm" />
+        <i
+          class="fas fa-search absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+      </div>
+
+      <!-- Tabs estilo Reddit/Sys-Reddit -->
+      <div class="flex border-b border-gray-100">
+        <button @click="activeTab = 'all'"
+          :class="activeTab === 'all' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400 hover:text-gray-600'"
+          class="px-6 py-3 font-bold text-sm transition-all">
+          Todos los artículos
+        </button>
+        <button @click="activeTab = 'mine'"
+          :class="activeTab === 'mine' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400 hover:text-gray-600'"
+          class="px-6 py-3 font-bold text-sm transition-all">
+          Mis artículos
+        </button>
+      </div>
     </div>
 
-    <!-- Tabla de Artículos -->
-    <div v-else-if="articles.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <table class="w-full text-left">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Título</th>
-            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Estado</th>
-            <th class="px-6 py-4 text-right">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr 
-            v-for="art in articles" 
-            :key="art.id" 
-            @click="goToReader(art.id)"
-            class="border-t border-gray-50 hover:bg-blue-50/30 cursor-pointer transition-colors group"
-          >
-            <td class="px-6 py-4 text-sm font-medium text-gray-700 group-hover:text-blue-600">
-              {{ art.title }}
-            </td>
-            <td class="px-6 py-4">
-              <span :class="art.status === 'Publicado' ? 'text-green-600 bg-green-50' : 'text-orange-600 bg-orange-50'" 
-                    class="px-2 py-1 rounded text-[10px] font-bold uppercase">
-                {{ art.status }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-right text-gray-400">
-              <button @click="goToEdit($event, art.id)" class="hover:text-blue-600 p-2">
-                <i class="fas fa-edit"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Estado de Carga -->
+    <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-b-blue-600 mb-4"></div>
+      <p class="text-gray-500 font-medium italic">Sincronizando con Debian...</p>
+    </div>
+
+    <!-- Listado de Tarjetas -->
+    <div v-else-if="filteredArticles.length > 0" class="flex flex-col gap-4">
+      <div v-for="art in filteredArticles" :key="art.idPublication"
+        class="group bg-white p-5 rounded-2xl border border-gray-100 hover:shadow-xl transition-all flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+
+        <div class="flex-grow min-w-0 w-full cursor-pointer" @click="goToReader(art.idPublication)">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[10px] font-black uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+              {{ art.publication?.contentType || 'Blog' }}
+            </span>
+            <span class="text-xs text-gray-400">• {{ new Date(art.publication?.createdAt).toLocaleDateString() }}</span>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 group-hover:text-blue-600 truncate transition-colors">
+            {{ art.publication?.title }}
+          </h3>
+          <p class="text-sm text-gray-500">
+            Escrito por <span class="font-semibold">{{ art.publication?.user?.firstName }} {{
+              art.publication?.user?.lastName }}</span>
+          </p>
+        </div>
+
+        <!-- Acciones Dinámicas -->
+        <div class="flex gap-2 self-end sm:self-center">
+
+          <!-- EDITAR: Solo si el usuario es el dueño -->
+          <button v-if="art.publication?.idUser === authStore.user?.id" @click="goToEdit($event, art.idPublication)"
+            class="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title="Editar">
+            <i class="fas fa-edit"></i>
+          </button>
+
+          <!-- ELIMINAR: Si es el dueño O si es Moderador/Admin -->
+          <button v-if="art.publication?.idUser === authStore.user?.id || canModerate"
+            @click.stop="deleteArticle(art.idPublication)"
+            class="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all" title="Eliminar">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+
+          <!-- REPORTAR: Solo para otros artículos si no soy moderador -->
+          <button v-if="art.publication?.idUser !== authStore.user?.id && !canModerate"
+            @click.stop="reportArticle(art.idPublication)"
+            class="p-2.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all"
+            title="Reportar">
+            <i class="fas fa-flag"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
-    <div v-else class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-      <i class="fas fa-file-alt text-gray-300 text-4xl mb-3"></i>
-      <p class="text-gray-500">No tienes artículos redactados aún.</p>
+    <div v-else class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+      <i class="fas fa-file-alt text-gray-200 text-5xl mb-4"></i>
+      <h3 class="text-lg font-bold text-gray-800">No hay artículos aquí</h3>
+      <p class="text-gray-400">¿Por qué no empiezas redactando algo nuevo?</p>
     </div>
   </div>
 </template>

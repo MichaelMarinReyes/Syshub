@@ -2,13 +2,16 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from "vue-toastification";
+import { useAuthStore } from '../../stores/auth'
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 
 const router = useRouter();
 const toast = useToast();
+const authStore = useAuthStore();
 
 const title = ref('');
+const idCurso = ref(null)
 const editorContainer = ref(null);
 let quill = null;
 const lastSaved = ref(null);
@@ -61,23 +64,25 @@ const publishArticle = async () => {
 
     const payload = {
         title: title.value,
-        content: quill.root.innerHTML,
-        // Aquí puedes agregar idUser de tu authStore
+        idUser: authStore.user?.id,
+        idCourse: idCurso.value || null,
+        body: quill.root.innerHTML,
+        urlImage: null
     };
 
     try {
-        // Aquí llamarías a tu API (puedes usar el método insert que creamos hoy)
-        // await api.post('/articles', payload);
+        await api.post('/blog-articles', payload);
 
         localStorage.removeItem('article_draft');
         toast.success("¡Artículo publicado con éxito!");
         router.push({ name: 'ArticlesList' });
     } catch (error) {
-        toast.error("Error al publicar el artículo");
+        const mensajeError = error.response?.data?.message || "Error al publicar el artículo";
+        toast.error(mensajeError);
+        console.error("Error en el servidor:", error.response?.data);
     }
 };
 
-// Ajuste automático de altura para el textarea del título
 const adjustHeight = (e) => {
     e.target.style.height = 'auto';
     e.target.style.height = e.target.scrollHeight + 'px';
@@ -123,7 +128,6 @@ const adjustHeight = (e) => {
 </template>
 
 <style>
-/* Reset de bordes para modo Zen */
 .ql-container.ql-snow,
 .ql-toolbar.ql-snow {
     border: none !important;
@@ -141,7 +145,6 @@ const adjustHeight = (e) => {
     padding: 8px 0;
 }
 
-/* Tipografía científica */
 .ql-editor {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-size: 1.25rem;

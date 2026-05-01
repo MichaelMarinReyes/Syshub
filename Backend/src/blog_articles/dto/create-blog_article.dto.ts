@@ -7,11 +7,11 @@ export class CreateBlogArticleDto {
 
     @IsUUID()
     @IsNotEmpty()
-    idUsuario: string;
+    idUser: string;
 
     @IsUUID()
     @IsOptional()
-    idCurso?: string;
+    idCourse?: string;
 
     @IsString()
     @IsNotEmpty()

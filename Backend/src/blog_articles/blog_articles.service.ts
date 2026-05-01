@@ -24,8 +24,8 @@ export class BlogArticlesService {
     try {
       const newPublication = queryRunner.manager.create(Publication, {
         title: dto.title,
-        idUser: dto.idUsuario,
-        idCourse: dto.idCurso || undefined,
+        idUser: dto.idUser,
+        idCourse: dto.idCourse || undefined,
         contentType: 'blog'
       } as Publication);
       const pubSave = await queryRunner.manager.save(newPublication);
@@ -77,10 +77,10 @@ export class BlogArticlesService {
     await queryRunner.startTransaction();
 
     try {
-      if (updateDto.title || updateDto.idCurso) {
+      if (updateDto.title || updateDto.idCourse) {
         await queryRunner.manager.update(Publication, id, {
           title: updateDto.title,
-          idCourse: updateDto.idCurso,
+          idCourse: updateDto.idCourse,
         });
       }
 

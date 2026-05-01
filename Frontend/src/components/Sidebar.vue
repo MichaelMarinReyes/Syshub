@@ -26,7 +26,7 @@ const menuConfig = {
 
 const generalItems = [
   { name: 'Sys-Reddit', to: '/app/sys-reddit', icon: 'fa-comments' },
-  { name: 'Mis Artículos', to: '/app/articulos', icon: 'fa-file-alt' },
+  { name: 'Artículos', to: '/app/articulos', icon: 'fa-file-alt' },
 ]
 
 const roleMenuItems = computed(() => {
@@ -77,8 +77,10 @@ const sidebarTitle = computed(() => `SYSHUB ${authStore.userRole?.toUpperCase() 
 
     <div class="p-4 border-t border-blue-400/30">
       <div class="mb-4 px-3 py-2 bg-blue-800/40 rounded-lg border border-white/10">
-        <p class="text-[10px] text-blue-200 uppercase font-bold">Usuario</p>
-        <p class="text-xs truncate">{{ authStore.user?.email || 'michael@cunoc.edu.gt' }}</p>
+        <p class="text-[10px] text-blue-200 uppercase font-bold tracking-wider">Usuario</p>
+        <p class="text-xs font-bold text-white truncate">
+          {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}
+        </p>
       </div>
       <button @click="handleLogout"
         class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-500/20 text-blue-100 hover:text-red-200 transition-colors group">
