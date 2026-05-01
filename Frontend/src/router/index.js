@@ -35,7 +35,7 @@ const routes = [
                 path: 'articulos',
                 name: 'ArticlesList',
                 component: () => import('@/views/articles/ArticlesListView.vue'),
-                meta: { title: 'Mis Artículos - Syshub' }
+                meta: { title: 'Artículos - Syshub' }
             },
             {
                 path: 'articulos/nuevo',
@@ -123,9 +123,9 @@ router.beforeEach((to, from, next) => {
     let userRole = null
     try {
         const userData = JSON.parse(localStorage.getItem('user') || '{}')
-        userRole = userData.role
+        userRole = (typeof userData.role === 'object' ? userData.role?.name : userData.role)
     } catch (e) {
-        console.error("Error parseando usuario")
+        console.error("Error parseando usuario en router")
     }
 
     if (to.meta.requiresAuth && !isAuthenticated) {
@@ -133,6 +133,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.meta.role && to.meta.role !== userRole) {
+        toast.warning("No tienes permisos para acceder a esta área administrativa");
         return next('/app/sys-reddit')
     }
 

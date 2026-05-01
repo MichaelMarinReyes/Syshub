@@ -74,7 +74,7 @@ const goToEdit = (event, id) => {
   <div class="max-w-5xl mx-auto p-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
       <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight text-center sm:text-left">
-        Explora Artículos
+        Artículos
       </h2>
       <button @click="goToCreate"
         class="w-full md:w-auto bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-sm transition-all active:scale-95">

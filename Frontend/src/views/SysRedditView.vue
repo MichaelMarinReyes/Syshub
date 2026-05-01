@@ -59,7 +59,7 @@ const submitPost = async () => {
   if (!newPost.value.title || !newPost.value.content) {
     return toast.error("Completa los campos obligatorios");
   }
-  
+
   isSubmitting.value = true;
   try {
     const payload = {
@@ -71,7 +71,7 @@ const submitPost = async () => {
     };
 
     await api.post('/publications', payload);
-    await fetchInitialData(); 
+    await fetchInitialData();
     toast.success("Publicación creada exitosamente");
     closeModal();
   } catch (error) {
@@ -84,11 +84,11 @@ const submitPost = async () => {
 
 const closeModal = () => {
   showModal.value = false;
-  newPost.value = { 
-    title: '', 
-    type: 'Publicación', 
-    content: '', 
-    selectedTags: new Set() 
+  newPost.value = {
+    title: '',
+    type: 'Publicación',
+    content: '',
+    selectedTags: new Set()
   };
 };
 
@@ -118,13 +118,38 @@ const filteredThreads = computed(() => {
   return list.sort((a, b) => new Date(b.date) - new Date(a.date));
 });
 
+const handleReview = async (id) => {
+  const confirmReview = confirm(
+    "¿Enviar publicación a revisión?\n\nSe ocultará del feed principal hasta que un moderador la apruebe."
+  );
+
+  if (!confirmReview) return;
+
+  try {
+    await api.patch(`/publications/${id}`, { statusId: 'revision' });
+
+    threads.value = threads.value.filter(t => t.id !== id);
+    toast.info("Publicación enviada a la cola de revisión");
+  } catch (error) {
+    console.error("Error al mover a revisión:", error);
+    toast.error("No se pudo mover la publicación");
+  }
+};
+
 const handleSuspend = async (id) => {
-  if (!confirm("¿Suspender publicación?")) return;
+  const confirmDelete = confirm(
+    "¿ESTÁS SEGURO?\n\nEsta acción suspenderá definitivamente la publicación y no será visible para nadie."
+  );
+
+  if (!confirmDelete) return;
+
   try {
     await api.patch(`/publications/${id}`, { statusId: 'suspendido' });
+
     threads.value = threads.value.filter(t => t.id !== id);
-    toast.info("Publicación suspendida");
+    toast.error("Publicación suspendida y eliminada del feed");
   } catch (error) {
+    console.error("Error al suspender:", error);
     toast.error("Error al realizar la acción");
   }
 };
@@ -156,7 +181,7 @@ const handleSuspend = async (id) => {
               <i class="fas fa-times"></i>
             </button>
           </div>
-          
+
           <form @submit.prevent="submitPost" class="p-6 space-y-5">
             <!-- Selector de Tipo -->
             <div class="w-full">
@@ -172,23 +197,18 @@ const handleSuspend = async (id) => {
             <div>
               <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Título</label>
               <input v-model="newPost.title" type="text" placeholder="¿Sobre qué quieres hablar?"
-                class="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
+                class="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                required />
             </div>
 
             <!-- Selector de Etiquetas Dinámico -->
             <div>
               <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Etiquetas Técnicas</label>
               <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
-                <button 
-                  v-for="tag in labels" 
-                  :key="tag.idLabel"
-                  type="button"
-                  @click="toggleTag(tag.idLabel)"
-                  :class="newPost.selectedTags.has(tag.idLabel) 
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
-                          : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'"
-                  class="text-[10px] font-bold px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1"
-                >
+                <button v-for="tag in labels" :key="tag.idLabel" type="button" @click="toggleTag(tag.idLabel)" :class="newPost.selectedTags.has(tag.idLabel)
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'"
+                  class="text-[10px] font-bold px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1">
                   <i v-if="newPost.selectedTags.has(tag.idLabel)" class="fas fa-check text-[8px]"></i>
                   #{{ tag.nameTag }}
                 </button>
@@ -218,7 +238,8 @@ const handleSuspend = async (id) => {
     </Transition>
 
     <!-- Filtros de Navegación -->
-    <div class="bg-white rounded-t-2xl border border-gray-100 p-3 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+    <div
+      class="bg-white rounded-t-2xl border border-gray-100 p-3 flex flex-wrap items-center justify-between gap-4 shadow-sm">
       <div class="flex bg-gray-50 p-1 rounded-xl">
         <button v-for="tab in tabs" :key="tab" @click="activeTab = tab"
           :class="activeTab === tab ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'"

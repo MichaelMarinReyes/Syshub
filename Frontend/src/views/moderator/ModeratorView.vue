@@ -18,7 +18,7 @@ const stats = computed(() => [
 const fetchReports = async () => {
   try {
     isLoading.value = true;
-    const response = await api.get('/moderation/reports');
+    const response = await api.get('/reports');
     reports.value = response.data;
   } catch (error) {
     console.error('Error al cargar reportes:', error);
