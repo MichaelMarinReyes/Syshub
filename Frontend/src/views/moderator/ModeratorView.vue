@@ -5,23 +5,39 @@ import ReportQueueTable from '@/components/moderator/ReportQueueTable.vue';
 import api from '@/api/axios';
 
 const reports = ref([]);
+const extraStats = ref({
+  pendingReview: 0,
+  activeForums: 0,
+  newArticles: 0
+});
 const isLoading = ref(true);
 
-// Datos para las tarjetas de moderación
+// Mapeo dinámico de las tarjetas
 const stats = computed(() => [
   { title: 'Cola de Reportes', count: reports.value.length, color: 'purple', icon: 'flag' },
-  { title: 'Revisión Pendiente', count: 12, color: 'indigo', icon: 'clock' },
-  { title: 'Foros Activos', count: 45, color: 'blue', icon: 'comments' },
-  { title: 'Artículos Nuevos', count: 8, color: 'green', icon: 'file-alt' }
+  { title: 'Revisión Pendiente', count: extraStats.value.pendingReview, color: 'indigo', icon: 'clock' },
+  { title: 'Foros Activos', count: extraStats.value.activeForums, color: 'blue', icon: 'comments' },
+  { title: 'Artículos Nuevos', count: extraStats.value.newArticles, color: 'green', icon: 'file-alt' }
 ]);
 
 const fetchReports = async () => {
   try {
     isLoading.value = true;
-    const response = await api.get('/reports');
-    reports.value = response.data;
+    
+    const [reportsRes, statsRes] = await Promise.all([
+      api.get('/reports'),
+      api.get('/publications/stats/summary')
+    ]);
+
+    reports.value = reportsRes.data;
+
+    extraStats.value = {
+      pendingReview: reportsRes.data.filter(r => r.resolutionStatus === 'pendiente').length,
+      activeForums: statsRes.data?.forums || 0,
+      newArticles: statsRes.data?.articles || 0
+    };
   } catch (error) {
-    console.error('Error al cargar reportes:', error);
+    console.error('Error al cargar datos de moderación:', error);
   } finally {
     isLoading.value = false;
   }

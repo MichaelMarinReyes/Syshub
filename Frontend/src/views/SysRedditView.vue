@@ -31,7 +31,7 @@ const fetchInitialData = async () => {
   isLoading.value = true;
   try {
     const [pubRes, labelRes] = await Promise.all([
-      api.get('/publications'),
+      api.get('/publications/feed'),
       api.get('/labels')
     ]);
 
@@ -124,27 +124,38 @@ const handleReview = async (id) => {
     title: 'Reportar para Revisión',
     input: 'textarea',
     inputLabel: 'Motivo del reporte',
-    inputPlaceholder: 'Explica brevemente por qué envías esto a revisión...',
+    inputPlaceholder: 'Explica por qué envías esto a revisión...',
     showCancelButton: true,
-    confirmButtonText: 'Enviar a Revisión',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#f59e0b',
+    confirmButtonText: 'Enviar Reporte',
+    cancelButtonColor: '#d33',
     inputValidator: (value) => {
-      if (!value) return '¡Debes escribir un motivo para el reporte!';
+      if (!value) return '¡Debes escribir un motivo!'
     }
   });
 
   if (isConfirmed && text) {
     try {
-      await api.patch(`/publications/${id}`, {
-        statusId: 'revision',
-        reportReason: text
+      const { data: statusList } = await api.get('/statuses');
+      const targetStatus = statusList.find(s => s.name === 'Suspendido' || s.name === 'En Revisión');
+
+      if (!targetStatus) throw new Error("Estado de moderación no encontrado en la DB");
+
+      await api.post('/reports', {
+        idPublication: id,
+        idUserReport: authStore.user?.id,
+        reasonComplaint: text
       });
+
+      await api.patch(`/publications/${id}/status`, {
+        statusId: targetStatus.id
+      });
+
       threads.value = threads.value.filter(t => t.id !== id);
-      toast.info("Publicación enviada a la cola de revisión");
+      toast.success("Publicación reportada y enviada a revisión");
+
     } catch (error) {
-      console.error("Error al reportar:", error);
-      toast.error("No se pudo procesar el reporte");
+      console.error("Error en el flujo de reporte:", error);
+      toast.error("No se pudo completar el reporte. Verifica la consola.");
     }
   }
 };

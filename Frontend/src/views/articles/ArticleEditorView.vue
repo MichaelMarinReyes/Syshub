@@ -5,6 +5,7 @@ import { useToast } from "vue-toastification";
 import { useAuthStore } from '../../stores/auth'
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import api from '../../api/axios'
 
 const router = useRouter();
 const toast = useToast();
@@ -79,7 +80,6 @@ const publishArticle = async () => {
     } catch (error) {
         const mensajeError = error.response?.data?.message || "Error al publicar el artículo";
         toast.error(mensajeError);
-        console.error("Error en el servidor:", error.response?.data);
     }
 };
 

@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Publication } from './entities/publication.entity';
 import { In, Repository } from 'typeorm';
 import { Label } from '@/labels/entities/label.entity';
-import { VotePublicationDto } from './dto/vote-publication.dto';
 
 @Injectable()
 export class PublicationsService {
@@ -127,5 +126,21 @@ export class PublicationsService {
     }
 
     return updatedPublication;
+  }
+
+  async getSummaryStats() {
+    const [forums, articles] = await Promise.all([
+      this.publicationRepository.count({
+        where: { contentType: 'foro' }
+      }),
+      this.publicationRepository.count({
+        where: { contentType: 'repositorio' }
+      })
+    ]);
+
+    return {
+      forums,
+      articles,
+    };
   }
 }
