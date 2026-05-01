@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import MainLayout from '../layouts/MainLayout.vue'
 
 const routes = [
@@ -32,6 +31,31 @@ const routes = [
                 component: () => import('@/views/SysRedditView.vue'),
                 meta: { title: 'Sys-Reddit - Foro de Discusión' }
             },
+            {
+                path: 'articulos',
+                name: 'ArticlesList',
+                component: () => import('@/views/articles/ArticlesListView.vue'),
+                meta: { title: 'Mis Artículos - Syshub' }
+            },
+            {
+                path: 'articulos/nuevo',
+                name: 'ArticleCreate',
+                component: () => import('@/views/articles/ArticleEditorView.vue'),
+                meta: { title: 'Nuevo Artículo Científico' }
+            },
+            {
+                path: 'articulos/leer/:id',
+                name: 'ArticleReader',
+                component: () => import('@/views/articles/ArticleReaderView.vue'),
+                props: true,
+                meta: { title: 'Lectura de Artículo' }
+            },
+            {
+                path: 'publication/:id',
+                name: 'publication-detail',
+                component: () => import('@/views/publications/PublicationDetail.vue'),
+                props: true
+            }
         ]
     },
     {
@@ -78,32 +102,13 @@ const routes = [
                 meta: { title: 'Revisión Pendiente - Moderación' }
             },
             {
-                path: 'foros',
-                name: 'mod-forums',
-                component: () => import('@/views/moderator/ForumsModView.vue'),
-                meta: { title: 'Gestión de Foros - Moderación' }
-            },
-            {
-                path: 'articulos',
+                path: 'articulos-global',
                 name: 'mod-articles',
-                component: () => import('@/views/moderator/ArticlesModView.vue'),
-                meta: { title: 'Gestión de Artículos - Moderación' }
-            },
-            {
-                path: '/publication/:id',
-                name: 'publication-detail',
-                component: () => import('@/views/publications/PublicationDetail.vue'),
-                props: true
+                component: () => import('@/views/articles/ArticlesListView.vue'),
+                meta: { title: 'Gestión Global de Artículos' }
             }
         ]
     }
-    /*
-    {
-      path: '/estudiante',
-      name: 'student-home',
-      component: () => import('../views/StudentHome.vue'),
-      meta: { requiresAuth: true, role: 'Estudiante' }
-    }*/
 ]
 
 const router = createRouter({
@@ -120,7 +125,7 @@ router.beforeEach((to, from, next) => {
         const userData = JSON.parse(localStorage.getItem('user') || '{}')
         userRole = userData.role
     } catch (e) {
-        console.error("Error parseando usuario del localStorage")
+        console.error("Error parseando usuario")
     }
 
     if (to.meta.requiresAuth && !isAuthenticated) {
@@ -128,7 +133,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.meta.role && to.meta.role !== userRole) {
-        return next(userRole === 'Estudiante' ? '/estudiante' : '/login')
+        return next('/app/sys-reddit')
     }
 
     if (to.meta.title) {
