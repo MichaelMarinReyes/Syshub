@@ -17,7 +17,8 @@ DELETE FROM publicaciones;
 INSERT INTO estados (nombre_estado) VALUES 
 ('Activo'),
 ('Inactivo'),
-('Suspendido');
+('Suspendido'),
+('En Revisión');
 
 INSERT INTO roles (nombre_rol, descripcion) VALUES 
 ('Admin', 'Administrador total del ecosistema Syshub'),

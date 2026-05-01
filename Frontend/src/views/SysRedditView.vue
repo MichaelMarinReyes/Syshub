@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from "vue-toastification";
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 import api from '../api/axios';
 
 const authStore = useAuthStore();
@@ -119,38 +120,32 @@ const filteredThreads = computed(() => {
 });
 
 const handleReview = async (id) => {
-  const confirmReview = confirm(
-    "¿Enviar publicación a revisión?\n\nSe ocultará del feed principal hasta que un moderador la apruebe."
-  );
+  const { value: text, isConfirmed } = await Swal.fire({
+    title: 'Reportar para Revisión',
+    input: 'textarea',
+    inputLabel: 'Motivo del reporte',
+    inputPlaceholder: 'Explica brevemente por qué envías esto a revisión...',
+    showCancelButton: true,
+    confirmButtonText: 'Enviar a Revisión',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#f59e0b',
+    inputValidator: (value) => {
+      if (!value) return '¡Debes escribir un motivo para el reporte!';
+    }
+  });
 
-  if (!confirmReview) return;
-
-  try {
-    await api.patch(`/publications/${id}`, { statusId: 'revision' });
-
-    threads.value = threads.value.filter(t => t.id !== id);
-    toast.info("Publicación enviada a la cola de revisión");
-  } catch (error) {
-    console.error("Error al mover a revisión:", error);
-    toast.error("No se pudo mover la publicación");
-  }
-};
-
-const handleSuspend = async (id) => {
-  const confirmDelete = confirm(
-    "¿ESTÁS SEGURO?\n\nEsta acción suspenderá definitivamente la publicación y no será visible para nadie."
-  );
-
-  if (!confirmDelete) return;
-
-  try {
-    await api.patch(`/publications/${id}`, { statusId: 'suspendido' });
-
-    threads.value = threads.value.filter(t => t.id !== id);
-    toast.error("Publicación suspendida y eliminada del feed");
-  } catch (error) {
-    console.error("Error al suspender:", error);
-    toast.error("Error al realizar la acción");
+  if (isConfirmed && text) {
+    try {
+      await api.patch(`/publications/${id}`, {
+        statusId: 'revision',
+        reportReason: text
+      });
+      threads.value = threads.value.filter(t => t.id !== id);
+      toast.info("Publicación enviada a la cola de revisión");
+    } catch (error) {
+      console.error("Error al reportar:", error);
+      toast.error("No se pudo procesar el reporte");
+    }
   }
 };
 </script>
@@ -306,14 +301,11 @@ const handleSuspend = async (id) => {
           </div>
 
           <!-- Moderación -->
-          <div v-if="canModerate" class="mt-4 flex gap-2 pt-4 border-t border-dashed border-gray-100">
-            <button @click.stop="handleSuspend(thread.id)"
-              class="flex-1 text-[10px] font-bold text-red-500 hover:bg-red-50 py-2 rounded-lg uppercase transition-colors">
-              Suspender
-            </button>
-            <button @click.stop="handleHide(thread.id)"
-              class="flex-1 text-[10px] font-bold text-gray-400 hover:bg-gray-50 py-2 rounded-lg uppercase transition-colors">
-              Ocultar
+          <div v-if="canModerate" class="mt-4 pt-4 border-t border-dashed border-gray-100">
+            <button @click.stop="handleReview(thread.id)"
+              class="w-full text-[10px] font-black uppercase tracking-wider text-amber-600 hover:bg-amber-50 py-2.5 rounded-xl border border-amber-100 transition-all flex items-center justify-center gap-2">
+              <i class="fas fa-shield-alt text-[12px]"></i>
+              Enviar a revisión
             </button>
           </div>
         </div>

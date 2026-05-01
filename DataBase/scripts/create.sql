@@ -59,6 +59,7 @@ CREATE TABLE publicaciones (
     titulo VARCHAR(255) NOT NULL,
     id_usuario UUID REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     id_curso UUID REFERENCES cursos(id_curso),
+    id_estado UUID REFERENCES estados(id_estado),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     tipo_contenido VARCHAR(20)
 );
