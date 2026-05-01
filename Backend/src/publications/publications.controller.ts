@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { PublicationsService } from './publications.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
@@ -6,14 +6,14 @@ import { VotePublicationDto } from './dto/vote-publication.dto';
 
 @Controller('publications')
 export class PublicationsController {
-  constructor(private readonly publicationsService: PublicationsService) {}
+  constructor(private readonly publicationsService: PublicationsService) { }
 
   @Post()
   create(@Body() createPublicationDto: CreatePublicationDto) {
     return this.publicationsService.create(createPublicationDto);
   }
 
-  @Get()
+  @Get('feed')
   findAll() {
     return this.publicationsService.findAll();
   }
@@ -22,6 +22,9 @@ export class PublicationsController {
   findOne(@Param('id') id: string) {
     return this.publicationsService.findOne(id);
   }
+
+  @Get('moderation/reported')
+  findReported() { return this.publicationsService.findReported(); }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePublicationDto: UpdatePublicationDto) {
@@ -33,8 +36,12 @@ export class PublicationsController {
     return this.publicationsService.remove(id);
   }
 
-  @Patch(':id/vote')
-  async vote(@Param('id') id: string, @Body() voteDto: VotePublicationDto) {
-    return await this.publicationsService.vote(id, voteDto);
+  @Patch(':id/status')
+  async changeStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('statusId', ParseUUIDPipe) statusId: string
+  ) {
+    return await this.publicationsService.updateStatus(id, statusId);
   }
+
 }

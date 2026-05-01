@@ -4,6 +4,7 @@ import { Comment } from "@/comments/entities/comment.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Label } from "@/labels/entities/label.entity";
 import { Course } from "@/course/entities/course.entity";
+import { Status } from "@/statuses/entities/status.entity";
 
 @Entity('publicaciones')
 export class Publication {
@@ -18,6 +19,13 @@ export class Publication {
 
     @CreateDateColumn({ name: 'fecha_creacion', type: 'timestamp' })
     createdAt: Date;
+
+    @Column({ name: 'id_estado', type: 'uuid', nullable: true })
+    idStatus: string;
+
+    @ManyToOne(() => Status)
+    @JoinColumn({ name: 'id_estado' })
+    status: Status;
 
     @Column({ name: 'id_usuario', type: 'uuid', nullable: true })
     idUser: string;

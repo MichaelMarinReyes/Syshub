@@ -35,7 +35,30 @@ export class PublicationsService {
 
   async findAll() {
     return await this.publicationRepository.find({
-      relations: ['tags', 'user']
+      where: {
+        status: { name: 'Activo' }
+      },
+      relations: ['tags', 'user', 'status'],
+      order: { createdAt: 'DESC' }
+    });
+  }
+
+  async findReported() {
+    return await this.publicationRepository.find({
+      where: {
+        status: { name: 'En Revisión' }
+      },
+      relations: ['tags', 'user', 'status', 'reports'],
+      order: { createdAt: 'ASC' }
+    });
+  }
+
+  async findSuspended() {
+    return await this.publicationRepository.find({
+      where: {
+        status: { name: 'Suspendido' }
+      },
+      relations: ['tags', 'user', 'status'],
     });
   }
 
@@ -89,25 +112,20 @@ export class PublicationsService {
     return { deleted: true };
   }
 
-  async vote(id: string, voteDto: VotePublicationDto): Promise<{ message: string; currentVotes: number }> {
-    const publication = await this.publicationRepository.findOne({ where: { id } });
+  async updateStatus(id: string, statusId: string): Promise<Publication> {
+    await this.publicationRepository.update(id, {
+      idStatus: statusId
+    });
 
-    if (!publication) {
-      throw new NotFoundException(`No se encontró la publicación para puntuar`);
-    }
-
-    // Cambiar el votes por el nombre de la columna
-    await this.publicationRepository.increment({ id }, 'votes', voteDto.stars);
-/*
     const updatedPublication = await this.publicationRepository.findOne({
       where: { id },
-      select: ['id', 'votes']
-    });*/
+      relations: ['status']
+    });
 
-    return {
-      message: `Has puntuado con ${voteDto.stars} estrellas`,
-      //currentVotes: updatedPublication.votes,
-      currentVotes: 0
-    };
+    if (!updatedPublication) {
+      throw new NotFoundException(`Error al recuperar la publicación actualizada con ID ${id}`);
+    }
+
+    return updatedPublication;
   }
 }
