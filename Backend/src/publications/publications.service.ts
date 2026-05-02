@@ -5,27 +5,44 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Publication } from './entities/publication.entity';
 import { In, Repository } from 'typeorm';
 import { Label } from '@/labels/entities/label.entity';
+import { Status } from '@/statuses/entities/status.entity';
 
 @Injectable()
 export class PublicationsService {
-  constructor(@InjectRepository(Publication)
-  private readonly publicationRepository: Repository<Publication>,
-
+  constructor(
+    @InjectRepository(Publication)
+    private readonly publicationRepository: Repository<Publication>,
     @InjectRepository(Label)
-    private readonly labelRepository: Repository<Label>
+    private readonly labelRepository: Repository<Label>,
+    @InjectRepository(Status)
+    private readonly statusRepository: Repository<Status>
   ) { }
 
   async create(createPublicationDto: CreatePublicationDto): Promise<Publication> {
     const { tagIds, ...publicationData } = createPublicationDto;
-    const newPublication = this.publicationRepository.create(publicationData);
+
+    const defaultStatus = await this.statusRepository.findOne({
+      where: { name: 'Activo' }
+    });
+
+    if (!defaultStatus) {
+      throw new NotFoundException('El estado "Activo" no fue encontrado en el sistema');
+    }
+
+    const newPublication = this.publicationRepository.create({
+      title: publicationData.title,
+      contentType: publicationData.contentType,
+      idUser: publicationData.idUser,
+      idStatus: defaultStatus.id
+    });
 
     if (tagIds && tagIds.length > 0) {
       const labels = await this.labelRepository.findBy({
         idLabel: In(tagIds)
       });
 
-      if (labels.length != tagIds.length) {
-        throw new NotFoundException('No se encontró la etiquta');
+      if (labels.length !== tagIds.length) {
+        throw new NotFoundException('Una o más etiquetas no fueron encontradas');
       }
       newPublication.tags = labels;
     }
@@ -103,12 +120,15 @@ export class PublicationsService {
     return await this.publicationRepository.save(publication);
   }
 
-  async remove(id: string): Promise<{ deleted: boolean }> {
+  async remove(id: string) {
     const publication = await this.findOne(id);
 
-    await this.publicationRepository.remove(publication);
+    await this.publicationRepository.delete(id);
 
-    return { deleted: true };
+    return {
+      deleted: true,
+      message: `Publicación ${id} eliminada correctamente`
+    };
   }
 
   async updateStatus(id: string, statusId: string): Promise<Publication> {

@@ -61,4 +61,21 @@ export class ReportsService {
     const report = await this.findOne(id);
     return await this.reportRepository.remove(report);
   }
+
+  async deleteReportAndContent(reportId: string) {
+    const report = await this.reportRepository.findOne({
+      where: { id: reportId },
+      relations: ['publication']
+    });
+
+    if (!report) {
+      throw new NotFoundException('El reporte no existe');
+    }
+
+    const publicationId = report.idPublication;
+
+    await this.reportRepository.delete(reportId);
+
+    return await this.reportRepository.delete(publicationId);
+  }
 }

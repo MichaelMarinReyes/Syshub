@@ -1,22 +1,24 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Limpieza en orden de jerarquía (de hijos a padres)
+DELETE FROM reportes;
+DELETE FROM comentarios;
+DELETE FROM posts_foros;
+DELETE FROM tag_publicaciones;
+DELETE FROM publicaciones;
+DELETE FROM usuarios;
 DELETE FROM estados;
 DELETE FROM roles;
-DELETE FROM usuarios;
 DELETE FROM cursos;
 DELETE FROM area_tecnica;
 DELETE FROM pensum;
 DELETE FROM etiquetas;
 DELETE FROM tecnologias;
-DELETE FROM tag_publicaciones;
-DELETE FROM reportes;
-DELETE FROM comentarios;
-DELETE FROM posts_foros;
-DELETE FROM publicaciones;
 
+-- 1. ESTADOS 
 INSERT INTO estados (nombre_estado) VALUES 
-('Activo'),
-('Inactivo'),
+('Activo'), 
+('Inactivo'), 
 ('Suspendido'),
 ('En Revisión');
 
@@ -54,7 +56,7 @@ VALUES
     (SELECT id_estado FROM estados WHERE nombre_estado = 'Activo'), NOW()
 );
 
--- 3. CLASIFICACIÓN SISTÉMICA
+-- 4. CLASIFICACIÓN ACADÉMICA
 INSERT INTO area_tecnica (nombre_area) VALUES 
 ('Desarrollo'), ('IA'), ('Infraestructura'), ('Sistemas y Organización'), ('Ciencias de la Computación');
 
@@ -63,13 +65,11 @@ INSERT INTO pensum (codigo_pensum, anio_vigencia) VALUES
 
 INSERT INTO cursos (nombre_curso, id_area, id_pensum) VALUES 
 ('Sistemas Operativos 1', (SELECT id_area FROM area_tecnica WHERE nombre_area = 'Infraestructura' LIMIT 1), (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2023' LIMIT 1)),
-('Teoría de Sistemas 1', (SELECT id_area FROM area_tecnica WHERE nombre_area = 'Sistemas y Organización' LIMIT 1), (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2023' LIMIT 1)),
-('Inteligencia Artificial 1', (SELECT id_area FROM area_tecnica WHERE nombre_area = 'IA' LIMIT 1), (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2026' LIMIT 1));
+('Teoría de Sistemas 1', (SELECT id_area FROM area_tecnica WHERE nombre_area = 'Sistemas y Organización' LIMIT 1), (SELECT id_pensum FROM pensum WHERE codigo_pensum = 'P2023' LIMIT 1));
 
 -- 4. ETIQUETAS
 INSERT INTO etiquetas (nombre_tag) VALUES 
-('IA'), ('Debian'), ('Networking'), ('Base de Datos'), ('Backend'), ('Infraestructura'),
-('Tutorial'), ('Investigación'), ('Proyecto'), ('Tarea'), ('Solución Técnica'), ('Hallazgo'), ('Clase Grabada');
+('IA'), ('Debian'), ('Networking'), ('Base de Datos'), ('Backend'), ('Proyecto'), ('Solución Técnica');
 
 -- 5. TECNOLOGÍAS
 INSERT INTO tecnologias (nombre_tecnologia, categoria) VALUES 
@@ -79,25 +79,58 @@ INSERT INTO tecnologias (nombre_tecnologia, categoria) VALUES
 
 -- 6. DATOS DE PRUEBA (PUBLICACIONES Y RELACIONES)
 WITH repo1 AS (
-    INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido)
-    VALUES ('Ecosistema Syshub - Análisis Fase 1', (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), (SELECT id_curso FROM cursos WHERE nombre_curso = 'Teoría de Sistemas 1' LIMIT 1), 'repositorio')
+    INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido, id_status)
+    VALUES (
+        'Ecosistema Syshub - Análisis Fase 1', 
+        (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), 
+        (SELECT id_curso FROM cursos WHERE nombre_curso = 'Teoría de Sistemas 1' LIMIT 1), 
+        'repositorio',
+        (SELECT id_estado FROM estados WHERE nombre_estado = 'Público' LIMIT 1) -- Estado inicial: Público
+    )
     RETURNING id_publicacion
 )
 INSERT INTO tag_publicaciones (id_publicacion, id_etiqueta)
 SELECT id_publicacion, (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Proyecto' LIMIT 1) FROM repo1;
 
+-- Foro: Post Reportado
+WITH post_reportado AS (
+    INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido, id_status)
+    VALUES (
+        '¿Cómo hackear el portal de la U?', 
+        (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), 
+        (SELECT id_curso FROM cursos WHERE nombre_curso = 'Sistemas Operativos 1' LIMIT 1), 
+        'foro',
+        (SELECT id_estado FROM estados WHERE nombre_estado = 'Reportado' LIMIT 1)
+    )
+    RETURNING id_publicacion
+)
+INSERT INTO reportes (id_publicacion, id_user_report, reason_complaint, resolution_status)
+SELECT 
+    id_publicacion, 
+    (SELECT id_usuario FROM usuarios WHERE correo = 'moderador@syshub.com' LIMIT 1), 
+    'Contenido malicioso que incita a actividades ilegales.', 
+    'pendiente' 
+FROM post_reportado;
+
+-- Foro: Post Normal
 WITH post1 AS (
-    INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido)
-    VALUES ('¿Cómo configurar OSPF en Debian 12?', (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), (SELECT id_curso FROM cursos WHERE nombre_curso = 'Sistemas Operativos 1' LIMIT 1), 'foro')
+    INSERT INTO publicaciones (titulo, id_usuario, id_curso, tipo_contenido, id_status)
+    VALUES (
+        '¿Cómo configurar OSPF en Debian 12?', 
+        (SELECT id_usuario FROM usuarios WHERE correo = 'admin@syshub.com' LIMIT 1), 
+        (SELECT id_curso FROM cursos WHERE nombre_curso = 'Sistemas Operativos 1' LIMIT 1), 
+        'foro',
+        (SELECT id_estado FROM estados WHERE nombre_estado = 'Público' LIMIT 1)
+    )
     RETURNING id_publicacion
 )
 INSERT INTO posts_foros (id_publicacion, es_pregunta_tecnica, estado_resolucion)
 SELECT id_publicacion, true, 'abierto' FROM post1;
 
+-- 7. ETIQUETAS Y COMENTARIOS
 INSERT INTO tag_publicaciones (id_publicacion, id_etiqueta) VALUES 
 ((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Debian' LIMIT 1)),
-((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Networking' LIMIT 1)),
-((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Solución Técnica' LIMIT 1));
+((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_etiqueta FROM etiquetas WHERE nombre_tag = 'Networking' LIMIT 1));
 
 INSERT INTO comentarios (id_publicacion, id_usuario, contenido, puntuacion_calidad) VALUES 
-((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_usuario FROM usuarios WHERE correo = 'auxiliar@syshub.com' LIMIT 1), 'Excelente duda. Como tip: revisen el archivo de configuración en /etc/frr/frr.conf.', 10);
+((SELECT id_publicacion FROM publicaciones WHERE titulo = '¿Cómo configurar OSPF en Debian 12?' LIMIT 1), (SELECT id_usuario FROM usuarios WHERE correo = 'moderador@syshub.com' LIMIT 1), 'Excelente duda. Como tip: revisen /etc/frr/frr.conf.', 10);

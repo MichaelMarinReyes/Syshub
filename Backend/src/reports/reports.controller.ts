@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
@@ -27,8 +27,8 @@ export class ReportsController {
     return this.reportsService.update(id, updateReportDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reportsService.remove(id);
+  @Delete(':id/purge')
+  async purge(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.reportsService.deleteReportAndContent(id);
   }
 }
