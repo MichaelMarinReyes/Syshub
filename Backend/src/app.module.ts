@@ -22,6 +22,8 @@ import { SessionsModule } from './sessions/sessions.module';
 import { TechnologiesModule } from './technologies/technologies.module';
 import { Publication } from './publications/entities/publication.entity';
 import { Label } from './labels/entities/label.entity';
+import { AssignmentsModule } from './assignments/assignments.module';
+import { CourseAssignmentModule } from './course-assignment/course-assignment.module';
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { Label } from './labels/entities/label.entity';
     ProjectsModule,
     SessionsModule,
     TechnologiesModule,
+    AssignmentsModule,
+    CourseAssignmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
