@@ -108,7 +108,33 @@ const routes = [
                 meta: { title: 'Gestión Global de Artículos' }
             }
         ]
-    }
+    },
+    {
+        path: '/auxiliar',
+        component: MainLayout,
+        meta: { requiresAuth: true, role: 'Auxiliar' },
+        redirect: { name: 'aux-curatorship' },
+        children: [
+            {
+                path: 'curaduria',
+                name: 'aux-curatorship',
+                component: () => import('@/views/auxiliary/CuratorshipView.vue'),
+                meta: { title: 'Gestión de Materiales - Syshub Auxiliar' }
+            },
+            {
+                path: 'proyectos-destacados',
+                name: 'aux-featured',
+                component: () => import('@/views/auxiliary/FeaturedProjectsView.vue'),
+                meta: { title: 'Destacar Proyectos - Syshub Auxiliar' }
+            },
+            {
+                path: 'mi-classroom',
+                name: 'aux-classroom',
+                component: () => import('@/views/auxiliary/CuratorshipView.vue'),
+                meta: { title: 'Mi Aula Virtual - Syshub' }
+            }
+        ]
+    },
 ]
 
 const router = createRouter({

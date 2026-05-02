@@ -126,3 +126,34 @@ CREATE TABLE reportes (
     id_moderador_asignado UUID REFERENCES usuarios(id_usuario),
     estado_resolucion VARCHAR(50) DEFAULT 'pendiente'
 );
+
+ALTER TABLE cursos 
+ADD COLUMN id_auxiliar UUID REFERENCES usuarios(id_usuario) ON DELETE SET NULL;
+
+CREATE TABLE asignaciones_cursos (
+    id_asignacion UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id_usuario UUID NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    id_curso UUID NOT NULL REFERENCES cursos(id_curso) ON DELETE CASCADE,
+    fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT uq_estudiante_curso UNIQUE (id_usuario, id_curso)
+);
+
+CREATE TABLE entregas_tareas (
+    id_entrega UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id_publicacion UUID NOT NULL REFERENCES publicaciones(id_publicacion) ON DELETE CASCADE,
+    id_usuario UUID NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    enlace_recurso TEXT, -- URL a Drive, GitHub, etc.
+    comentario_estudiante TEXT,
+    fecha_entrega TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calificacion DECIMAL(5,2) DEFAULT 0.00,
+    id_estado UUID REFERENCES estados(id_estado)
+);
+
+ALTER TABLE proyectos 
+ADD COLUMN fecha_destacado TIMESTAMP,         
+ADD COLUMN id_auxiliar_curador UUID REFERENCES usuarios(id_usuario);
+                                                                                                 
+CREATE INDEX idx_asignaciones_estudiante ON asignaciones_cursos(id_usuario);
+CREATE INDEX idx_asignaciones_curso ON asignaciones_cursos(id_curso);
+CREATE INDEX idx_entregas_publicacion ON entregas_tareas(id_publicacion);

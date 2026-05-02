@@ -24,9 +24,11 @@ const handleSubmit = async () => {
     if (authStore.userRole === 'Admin') {
       router.push({ name: 'admin-users' });
     } else if (authStore.userRole === 'Moderador') {
-      router.push({ name: 'mod-reports'})
+      router.push({ name: 'mod-reports' })
     } else if (authStore.userRole === 'Estudiante') {
       router.push({ name: 'student-home' });
+    } else if (authStore.userRole === 'Auxiliar') {
+      router.push({ name: 'aux-curatorship' })
     } else {
       router.push('/');
     }

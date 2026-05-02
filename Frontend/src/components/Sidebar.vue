@@ -22,6 +22,10 @@ const menuConfig = {
     { name: 'Revisión Pendiente', to: '/moderador/revision', icon: 'fa-clock' },
     { name: 'Gestión Contenido', to: '/moderador/articulos-global', icon: 'fa-tasks' },
   ],
+  Auxiliar: [
+    { name: 'Gestión Aula', to: '/auxiliar/curaduria', icon: 'fa-chalkboard-teacher' },
+    { name: 'Proyectos Estudiantes', to: '/auxiliar/proyectos-destacados', icon: 'fa-star' },
+  ],
 }
 
 const generalItems = [
