@@ -106,7 +106,7 @@ onMounted(fetchMyCourses);
       <div v-if="!selectedCourse">
         <div class="flex justify-between items-center mb-10">
           <div>
-            <h1 class="text-3xl font-black text-gray-800 tracking-tighter">SYSHUB CLASSROOM</h1>
+            <h1 class="text-3xl font-black text-gray-800 tracking-tighter">CURADURÍA</h1>
             <p class="text-gray-500 text-sm">Gestión académica para auxiliares y estudiantes.</p>
           </div>
           <div class="flex gap-3">

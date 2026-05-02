@@ -14,12 +14,20 @@ entity "roles" as rol {
     PK(id_rol)
     --
     nombre_rol
+    descripcion
+}
+
+entity "estados" as estado {
+    PK(id_estado)
+    --
+    nombre_estado
 }
 
 entity "usuarios" as usuario {
     PK(id_usuario)
     --
     nombre
+    apellido
     correo
     password_hash
     FK(id_rol)
@@ -41,7 +49,13 @@ entity "pensum" as pensum {
     PK(id_pensum)
     --
     codigo_pensum
-    año_vigencia
+    anio_vigencia
+}
+
+entity "area_tecnica" as area {
+    PK(id_area)
+    --
+    nombre_area
 }
 
 entity "cursos" as curso {
@@ -52,10 +66,13 @@ entity "cursos" as curso {
     FK(id_pensum)
 }
 
-entity "area_tecnica" as area {
-    PK(id_area)
+entity "cursos_auxiliar" as c_aux {
+    PK(id_curso_auxiliar)
     --
-    nombre_area
+    FK(id_curso)
+    FK(id_usuario)
+    codigo_acceso
+    fecha_creacion
 }
 
 entity "publicaciones" as pub {
@@ -63,18 +80,32 @@ entity "publicaciones" as pub {
     --
     titulo
     FK(id_usuario)
-    FK(id_curso)
+    FK(id_curso_auxiliar)
+    FK(id_estado)
     fecha_creacion
     tipo_contenido
+}
+
+entity "tecnologias" as tec {
+    PK(id_tecnologia)
+    --
+    nombre_tecnologia
+    categoria
 }
 
 entity "proyectos" as proy {
     PK(FK(id_publicacion))
     --
     descripcion_tecnica
-    stack_tecnologico
     url_adjunto
     es_destacado
+    fecha_destacado
+    FK(id_auxiliar_curador)
+}
+
+entity "proyecto_tecnologias" as p_tec {
+    PK(FK(id_publicacion))
+    PK(FK(id_tecnologia))
 }
 
 entity "posts_foros" as foro {
@@ -117,15 +148,50 @@ entity "reportes" as rep {
     FK(id_publicacion)
     FK(id_usuario_reporta)
     motivo_denuncia
-    id_moderador_asignado
+    FK(id_moderador_asignado)
     estado_resolucion
 }
 
-usuario ||--{ sesion
+entity "asignaciones_cursos" as asig {
+    PK(id_asignacion)
+    --
+    FK(id_usuario)
+    FK(id_curso_auxiliar)
+    fecha_asignacion
+}
+
+entity "entregas_tareas" as entrega {
+    PK(id_entrega)
+    --
+    FK(id_publicacion)
+    FK(id_usuario)
+    enlace_recurso
+    comentario_estudiante
+    fecha_entrega
+    calificacion
+    FK(id_estado)
+}
+
+' Relaciones
 rol ||--{ usuario
+estado ||--{ usuario
+estado ||--{ pub
+estado ||--{ entrega
+
+usuario ||--{ sesion
+usuario ||--{ c_aux
+usuario ||--{ pub
+usuario ||--{ com
+usuario ||--{ rep
+usuario ||--{ asig
+usuario ||--{ entrega
+usuario ||--{ proy
+
 pensum ||--{ curso
 area ||--{ curso
-curso ||--{ pub
+curso ||--{ c_aux
+c_aux ||--{ pub
+c_aux ||--{ asig
 
 pub ||--|| proy
 pub ||--|| foro
@@ -133,8 +199,11 @@ pub ||--|| blog
 
 pub ||--{ com
 pub ||--{ p_tag
-tag ||--{ p_tag
 pub ||--{ rep
-usuario ||--{ com
+pub ||--{ entrega
+
+tag ||--{ p_tag
+tec ||--{ p_tec
+proy ||--{ p_tec
 
 @enduml

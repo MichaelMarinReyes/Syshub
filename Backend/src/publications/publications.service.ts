@@ -52,7 +52,7 @@ export class PublicationsService {
   async findAll() {
     return await this.publicationRepository.find({
       where: {
-        status: { name: 'Activo' }
+        status: { name: 'Público' }
       },
       relations: ['tags', 'user', 'status'],
       order: { createdAt: 'DESC' }
@@ -84,11 +84,12 @@ export class PublicationsService {
       relations: [
         'user',
         'user.role',
-        'course',
+        'courseAuxiliary',
         'tags',
-        '|ents',
+        'comments',
         'comments.user',
-        'comments.user.role'
+        'comments.user.role',
+        'blogArticle'
       ]
     });
 

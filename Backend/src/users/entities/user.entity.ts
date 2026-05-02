@@ -3,7 +3,6 @@ import { CourseAssignment } from "@/course-assignment/entities/course-assignment
 import { CourseAuxiliary } from "@/course-auxiliary/entities/course-auxiliary.entity";
 import { Role } from "@/roles/entities/role.entity";
 import { Status } from "@/statuses/entities/status.entity";
-import { Session } from "inspector/promises";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('usuarios')

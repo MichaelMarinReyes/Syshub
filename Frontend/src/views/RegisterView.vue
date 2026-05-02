@@ -21,7 +21,7 @@ const handleRegister = async () => {
 
   try {
     console.log(form.value)
-    await api.post('/users/register', form.value);
+    await api.post('/user/register', form.value);
 
     alert('¡Registro exitoso! Ya puedes intentar iniciar sesión.');
     //router.push('/login');

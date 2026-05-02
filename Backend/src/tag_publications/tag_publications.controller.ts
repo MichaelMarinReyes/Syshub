@@ -12,7 +12,7 @@ export class TagPublicationsController {
   }
 
   @Get(':id_publicacion')
-  findAllByPub(@Param('id_publicacion', ParseUUIDPipe) id: string) {
+  findAllByPub(@Param('idPublication', ParseUUIDPipe) id: string) {
     return this.tagPubService.findByPublication(id);
   }
 

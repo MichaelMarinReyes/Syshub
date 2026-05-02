@@ -27,12 +27,12 @@ export class TagPublicationsService {
 
   async findByPublication(id_publicacion: string) {
     return await this.tagPubRepository.find({
-      where: { id_publicacion },
+      where: { idPublication: id_publicacion },
       relations: ['tag'],
     });
   }
 
-  async remove(id_publicacion: string, id_etiqueta: string) {
-    return await this.tagPubRepository.delete({ id_publicacion, id_etiqueta });
+  async remove(idPublication: string, idLabel: string) {
+    return await this.tagPubRepository.delete({ idPublication, idLabel });
   }
 }

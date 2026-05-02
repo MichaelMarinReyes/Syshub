@@ -19,7 +19,7 @@ const getPriorityColor = (priority) => {
   <div class="p-8 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto">
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">Panel de Curaduría</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Proyecos Destacados</h1>
         <p class="text-sm text-gray-500">Selecciona los proyectos más destacados para la página principal.</p>
       </div>
 

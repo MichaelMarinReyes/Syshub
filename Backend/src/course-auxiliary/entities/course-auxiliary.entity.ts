@@ -19,7 +19,7 @@ export class CourseAuxiliary {
     @Column({ name: 'id_usuario', type: 'uuid' })
     idUser: string;
 
-    @ManyToOne(() => User, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.courseEnrollments, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id_usuario' })
     user: User;
 

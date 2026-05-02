@@ -4,7 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Role } from '@/roles/entities/role.entity';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { Status } from '@/statuses/entities/status.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 

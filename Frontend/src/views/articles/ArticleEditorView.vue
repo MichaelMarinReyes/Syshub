@@ -66,7 +66,7 @@ const publishArticle = async () => {
     const payload = {
         title: title.value,
         idUser: authStore.user?.id,
-        idCourse: idCurso.value || null,
+        idCourseAuxiliary: idCurso.value || null,
         body: quill.root.innerHTML,
         urlImage: null
     };
