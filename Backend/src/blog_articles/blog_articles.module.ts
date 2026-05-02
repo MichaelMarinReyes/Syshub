@@ -6,9 +6,9 @@ import { BlogArticle } from './entities/blog_article.entity';
 import { Publication } from '@/publications/entities/publication.entity';
 
 @Module({
-  imports: [ TypeOrmModule.forFeature([BlogArticle, Publication])],
+  imports: [TypeOrmModule.forFeature([BlogArticle, Publication])],
   controllers: [BlogArticlesController],
   providers: [BlogArticlesService],
   exports: [BlogArticlesService]
 })
-export class BlogArticlesModule {}
+export class BlogArticlesModule { }

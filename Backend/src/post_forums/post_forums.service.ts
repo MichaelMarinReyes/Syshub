@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostForumDto } from './dto/create-post_forum.dto';
 import { UpdatePostForumDto } from './dto/update-post_forum.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { PostForum } from './entities/post_forum.entity';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class PostForumsService {
@@ -11,7 +11,7 @@ export class PostForumsService {
 
   async create(createDto: CreatePostForumDto): Promise<PostForum> {
         const newPost = this.postForumRepository.create({
-            id: createDto.idPublication,
+            idPublication: createDto.idPublication,
             isTechnicalQuestion: createDto.isTechnicalQuestion,
             resolutionStatus: createDto.resolutionStatus
         });
@@ -26,7 +26,7 @@ export class PostForumsService {
 
     async findOne(id: string): Promise<PostForum> {
         const post = await this.postForumRepository.findOne({
-            where: { id },
+            where: { idPublication: id },
             relations: ['publication', 'publication.user', 'publication.tags']
         });
 

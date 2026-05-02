@@ -1,10 +1,9 @@
 import { Course } from "@/course/entities/course.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
-
 @Entity('pensum')
 export class Pensum {
-    @PrimaryGeneratedColumn('uuid', { name: 'id_persona' })
+    @PrimaryGeneratedColumn('uuid', { name: 'id_pensum' })
     id: string;
 
     @Column({ name: 'codigo_pensum', type: 'varchar', length: 20 })
@@ -14,5 +13,5 @@ export class Pensum {
     effectiveYear: number;
 
     @OneToMany(() => Course, (course) => course.pensum)
-    courses: Course[]
+    courses: Course[];
 }

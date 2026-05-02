@@ -12,7 +12,7 @@ export class BlogArticle {
     @Column({ name: 'url_imagen_portada', type: 'text', nullable: true })
     urlImage: string;
 
-    @OneToOne(() => Publication, { onDelete: 'CASCADE' })
+    @OneToOne(() => Publication, (publication) => publication.blogArticle, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id_publicacion' })
     publication: Publication;
 }

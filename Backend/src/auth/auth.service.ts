@@ -1,7 +1,7 @@
 import { UsersService } from '@/users/users.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +17,7 @@ export class AuthService {
         if (user.status.name !== 'Activo') {
             throw new UnauthorizedException('Tu cuenta se encuentra Inactiva, si este es un error comunícate con un Administrador');
         }
-        
+
         const isMatch = await bcrypt.compare(pass.trim(), user.password.trim());
 
         if (!isMatch) {

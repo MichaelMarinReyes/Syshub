@@ -5,7 +5,7 @@ import { UpdateBlogArticleDto } from './dto/update-blog_article.dto';
 
 @Controller('blog-articles')
 export class BlogArticlesController {
-  constructor(private readonly blogArticlesService: BlogArticlesService) {}
+  constructor(private readonly blogArticlesService: BlogArticlesService) { }
 
   @Post()
   create(@Body() createBlogArticleDto: CreateBlogArticleDto) {

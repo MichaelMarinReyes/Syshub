@@ -9,4 +9,4 @@ import { ProjectTechnology } from './entities/technology_project.entity';
   controllers: [TechnologyProjectController],
   providers: [TechnologyProjectService],
 })
-export class TechnologyProjectModule {}
+export class TechnologyProjectModule { }

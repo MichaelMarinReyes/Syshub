@@ -1,17 +1,17 @@
-import { User } from '@/users/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { User } from "@/users/entities/user.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('roles')
 export class Role {
-  @PrimaryGeneratedColumn('uuid', { name: 'id_rol' })
-  id!: string;
+    @PrimaryGeneratedColumn('uuid', { name: 'id_rol'})
+    id: string;
 
-  @Column({ name: 'nombre_rol', unique: true, type: 'varchar', length: 50 })
-  name!: string;
+    @Column({name: 'nombre_rol', type: 'varchar', length: 50, unique: true})
+    name: string
 
-  @Column({ name: 'descripcion', type: 'varchar', length: 200 })
-  description!: string;
+    @Column({name: 'descripcion', type: 'varchar', length: 200})
+    description: string;
 
-  @OneToMany(() => User, (user) => user.role)
-  users!: User[]
+    @OneToMany(() => User, (user) => user.role)
+    users: User[]
 }

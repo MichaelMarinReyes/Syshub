@@ -7,17 +7,23 @@ export class Comment {
     @PrimaryGeneratedColumn('uuid', { name: 'id_comentario' })
     idComment: string;
 
-    @Column('text', { name: 'contenido' })
-    content: string;
+    @Column({ name: 'id_publicacion', type: 'uuid' })
+    idPublication: string;
 
-    @Column('integer', { name: 'puntuacion_calidad', default: 0 })
-    qualityScore: number;
-
-    @ManyToOne(() => Publication, (pub) => pub.comments, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Publication, (publication) => publication.comments, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id_publicacion' })
     publication: Publication;
 
-    @ManyToOne(() => User)
+    @Column({ name: 'id_usuario', type: 'uuid', nullable: true })
+    idUser: string;
+
+    @ManyToOne(() => User, { onDelete: 'SET NULL' })
     @JoinColumn({ name: 'id_usuario' })
     user: User;
+
+    @Column({ name: 'contenido', type: 'text' })
+    content: string;
+
+    @Column({ name: 'puntuacion_calidad', type: 'integer', default: 0 })
+    qualityScore: number;
 }

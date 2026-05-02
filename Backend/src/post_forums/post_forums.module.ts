@@ -9,4 +9,4 @@ import { PostForum } from './entities/post_forum.entity';
   controllers: [PostForumsController],
   providers: [PostForumsService],
 })
-export class PostForumsModule {}
+export class PostForumsModule { }

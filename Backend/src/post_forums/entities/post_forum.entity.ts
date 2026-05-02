@@ -1,10 +1,10 @@
 import { Publication } from "@/publications/entities/publication.entity";
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('posts_foros')
 export class PostForum {
-    @PrimaryColumn('uuid', { name: 'id_publicacion' })
-    id: string;
+    @PrimaryGeneratedColumn('uuid', { name: 'id_publicacion' })
+    idPublication: string;
 
     @Column({ name: 'es_pregunta_tecnica', type: 'boolean', default: true })
     isTechnicalQuestion: boolean;

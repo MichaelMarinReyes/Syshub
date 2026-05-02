@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsUUID } from "class-validator";
 
 export class UserStatusUpdateDto {
-  @IsUUID()
-  @IsNotEmpty()
-  statusId: string;
+    @IsUUID()
+    @IsNotEmpty()
+    statusId: string;
 }

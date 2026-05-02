@@ -1,3 +1,4 @@
+import { Assignment } from '@/assignments/entities/assignment.entity';
 import { Publication } from '@/publications/entities/publication.entity';
 import { User } from '@/users/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
@@ -14,5 +15,8 @@ export class Status {
     users!: User[]
 
     @OneToMany(() => Publication, (publication) => publication.status)
-    publications!: Publication[];
+    publications: Publication[];
+
+    @OneToMany(() => Assignment, (assignment) => assignment.status)
+    assignments: Assignment[];
 }

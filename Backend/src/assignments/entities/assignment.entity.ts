@@ -6,38 +6,38 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGenerat
 @Entity('entregas_tareas')
 export class Assignment {
     @PrimaryGeneratedColumn('uuid', { name: 'id_entrega' })
-    id!: string;
+    id: string;
 
     @Column({ name: 'id_publicacion', type: 'uuid' })
-    idPublication!: string;
+    idPublication: string;
 
-    @ManyToOne(() => Publication, (publication) => publication.comments, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Publication, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id_publicacion' })
-    publication!: Publication;
+    publication: Publication;
 
     @Column({ name: 'id_usuario', type: 'uuid' })
-    idUser!: string;
+    idUser: string;
 
     @ManyToOne(() => User, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'id_usuario' })
-    user!: User;
+    user: User;
 
     @Column({ name: 'enlace_recurso', type: 'text', nullable: true })
-    resourceLink?: string;
+    resourceLink: string;
 
     @Column({ name: 'comentario_estudiante', type: 'text', nullable: true })
-    studentComment?: string;
+    studentComment: string;
 
     @CreateDateColumn({ name: 'fecha_entrega', type: 'timestamp' })
-    submittedAt!: Date;
+    submittedAt: Date;
 
-    @Column({ name: 'calificacion', type: 'numeric', precision: 5, scale: 2, default: 0.00 })
-    grade!: number;
+    @Column({ name: 'calificacion', type: 'decimal', precision: 5, scale: 2, default: 0.00 })
+    grade: number;
 
     @Column({ name: 'id_estado', type: 'uuid', nullable: true })
-    idStatus?: string;
+    idStatus: string;
 
     @ManyToOne(() => Status)
     @JoinColumn({ name: 'id_estado' })
-    status?: Status;
+    status: Status;
 }

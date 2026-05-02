@@ -11,4 +11,4 @@ import { Publication } from '@/publications/entities/publication.entity';
   providers: [LabelsService],
   exports: [TypeOrmModule]
 })
-export class LabelsModule {}
+export class LabelsModule { }

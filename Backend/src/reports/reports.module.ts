@@ -12,4 +12,4 @@ import { PublicationsModule } from '@/publications/publications.module';
   controllers: [ReportsController],
   providers: [ReportsService],
 })
-export class ReportsModule {}
+export class ReportsModule { }

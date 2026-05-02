@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Req } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
-import { GradeAssignmentDto } from './dto/grade-assignment.dto';
+import { UpdateAssignmentDto } from './dto/update-assignment.dto';
+import { GradeAssignmentDto } from './dto/grade-assignment.dt';
 
 @Controller('assignments')
 export class AssignmentsController {

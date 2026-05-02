@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Publication } from './entities/publication.entity';
-import { In, Repository } from 'typeorm';
 import { Label } from '@/labels/entities/label.entity';
 import { Status } from '@/statuses/entities/status.entity';
+import { In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class PublicationsService {
@@ -86,7 +86,7 @@ export class PublicationsService {
         'user.role',
         'course',
         'tags',
-        'comments',
+        '|ents',
         'comments.user',
         'comments.user.role'
       ]

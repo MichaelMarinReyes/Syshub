@@ -5,7 +5,7 @@ import { UpdatePensumDto } from './dto/update-pensum.dto';
 
 @Controller('pensum')
 export class PensumController {
-  constructor(private readonly pensumService: PensumService) {}
+  constructor(private readonly pensumService: PensumService) { }
 
   @Post()
   create(@Body() createPensumDto: CreatePensumDto) {

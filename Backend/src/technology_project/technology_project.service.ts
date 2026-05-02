@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTechnologyProjectDto } from './dto/create-technology_project.dto';
 import { UpdateTechnologyProjectDto } from './dto/update-technology_project.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ProjectTechnology } from './entities/technology_project.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TechnologyProjectService {
@@ -44,4 +44,3 @@ export class TechnologyProjectService {
     }
   }
 }
-

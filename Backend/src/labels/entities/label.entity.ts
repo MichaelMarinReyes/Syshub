@@ -6,7 +6,7 @@ export class Label {
     @PrimaryGeneratedColumn('uuid', { name: 'id_etiqueta' })
     idLabel: string;
 
-    @Column({ name: 'nombre_tag', type: 'varchar', unique: true })
+    @Column({ name: 'nombre_tag', type: 'varchar', length: 50, unique: true })
     nameTag: string;
 
     @ManyToMany(() => Publication, (publication) => publication.tags)

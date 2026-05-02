@@ -1,11 +1,11 @@
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { Repository } from 'typeorm';
 import { Pensum } from '@/pensum/entities/pensum.entity';
 import { TechnicalArea } from '@/technical-area/entities/technical-area.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CourseService {

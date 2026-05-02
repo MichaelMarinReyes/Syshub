@@ -1,10 +1,10 @@
-import { Controller, Post, Get, Body, Param, ParseUUIDPipe, Req, UseGuards } from '@nestjs/common';
-import { CourseAssignmentsService } from './course-assignment.service';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ParseUUIDPipe } from '@nestjs/common';
+import { CourseAssignmentService } from './course-assignment.service';
 import { CreateAssignmentDto } from './dto/create-course-assignment.dto';
 
-@Controller('assignments')
-export class CourseAssignmentsController {
-    constructor(private readonly assignmentsService: CourseAssignmentsService) {}
+@Controller('course-assignment')
+export class CourseAssignmentController {
+  constructor(private readonly assignmentsService: CourseAssignmentService) {}
 
     @Post('enroll')
     async enroll(@Body() createAssignmentDto: CreateAssignmentDto, @Req() req: any) {

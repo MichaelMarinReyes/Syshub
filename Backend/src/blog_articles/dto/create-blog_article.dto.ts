@@ -11,7 +11,7 @@ export class CreateBlogArticleDto {
 
     @IsUUID()
     @IsOptional()
-    idCourse?: string;
+    idCourseAuxiliary?: string;
 
     @IsString()
     @IsNotEmpty()

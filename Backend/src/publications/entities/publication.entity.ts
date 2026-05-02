@@ -1,10 +1,11 @@
-import { Report } from "@/reports/entities/report.entity";
-import { User } from "@/users/entities/user.entity";
+import { BlogArticle } from "@/blog_articles/entities/blog_article.entity";
 import { Comment } from "@/comments/entities/comment.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { CourseAuxiliary } from "@/course-auxiliary/entities/course-auxiliary.entity";
 import { Label } from "@/labels/entities/label.entity";
-import { Course } from "@/course/entities/course.entity";
+import { Report } from "@/reports/entities/report.entity";
 import { Status } from "@/statuses/entities/status.entity";
+import { User } from "@/users/entities/user.entity";
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('publicaciones')
 export class Publication {
@@ -34,13 +35,13 @@ export class Publication {
     @JoinColumn({ name: 'id_usuario' })
     user: User;
 
-    @Column({ name: 'id_curso', type: 'uuid', nullable: true })
-    idCourse: string;
+    @Column({ name: 'id_curso_auxiliar', type: 'uuid', nullable: true })
+    idCourseAuxiliary: string;
 
-    @ManyToOne(() => Course)
-    @JoinColumn({ name: 'id_curso'})
-    course: Course;
-    
+    @ManyToOne(() => CourseAuxiliary, (courseAuxiliary) => courseAuxiliary.publications, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'id_curso_auxiliar' })
+    courseAuxiliary: CourseAuxiliary;
+
     @OneToMany(() => Report, (report) => report.publication)
     reports: Report[];
 
@@ -60,4 +61,7 @@ export class Publication {
         }
     })
     tags: Label[];
+
+    @OneToOne(() => BlogArticle, (blog) => blog.publication)
+    blogArticle: BlogArticle;
 }

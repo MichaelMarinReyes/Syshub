@@ -9,4 +9,4 @@ import { Technology } from './entities/technology.entity';
   controllers: [TechnologiesController],
   providers: [TechnologiesService],
 })
-export class TechnologiesModule {}
+export class TechnologiesModule { }

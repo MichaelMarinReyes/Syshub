@@ -1,12 +1,12 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { ILike, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt'
 import { Role } from '@/roles/entities/role.entity';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
 import { Status } from '@/statuses/entities/status.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {

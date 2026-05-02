@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
-import { BlogArticle } from './entities/blog_article.entity';
-import { Publication } from '@/publications/entities/publication.entity';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateBlogArticleDto } from './dto/create-blog_article.dto';
 import { UpdateBlogArticleDto } from './dto/update-blog_article.dto';
+import { BlogArticle } from './entities/blog_article.entity';
+import { Publication } from '@/publications/entities/publication.entity';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BlogArticlesService {
@@ -25,9 +25,10 @@ export class BlogArticlesService {
       const newPublication = queryRunner.manager.create(Publication, {
         title: dto.title,
         idUser: dto.idUser,
-        idCourse: dto.idCourse || undefined,
+        idCourseAuxiliary: dto.idCourseAuxiliary || undefined,
         contentType: 'blog'
-      } as Publication);
+      } as any);
+
       const pubSave = await queryRunner.manager.save(newPublication);
 
       const newArticle = queryRunner.manager.create(BlogArticle, {
@@ -40,7 +41,6 @@ export class BlogArticlesService {
       await queryRunner.commitTransaction();
       return result;
     } catch (error) {
-      console.log(error)
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException('Error al crear el artículo en el servidor');
     } finally {
@@ -50,9 +50,15 @@ export class BlogArticlesService {
 
   async findAll() {
     return await this.repositorioBlog.find({
-      relations: ['publication', 'publication.user'],
+      relations: {
+        publication: {
+          user: true
+        }
+      },
       order: {
-        publication: { createdAt: 'DESC' }
+        publication: {
+          createdAt: 'DESC'
+        }
       }
     });
   }
@@ -60,7 +66,12 @@ export class BlogArticlesService {
   async findOne(id: string) {
     const articulo = await this.repositorioBlog.findOne({
       where: { idPublication: id },
-      relations: ['publication', 'publication.user', 'publication.comments'],
+      relations: {
+        publication: {
+          user: true,
+          comments: true
+        }
+      }
     });
 
     if (!articulo) {
@@ -77,10 +88,10 @@ export class BlogArticlesService {
     await queryRunner.startTransaction();
 
     try {
-      if (updateDto.title || updateDto.idCourse) {
+      if (updateDto.title || updateDto.idCourseAuxiliary) {
         await queryRunner.manager.update(Publication, id, {
           title: updateDto.title,
-          idCourse: updateDto.idCourse,
+          idCourseAuxiliary: updateDto.idCourseAuxiliary,
         });
       }
 

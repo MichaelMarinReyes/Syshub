@@ -4,11 +4,11 @@ import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
-    constructor (private authService: AuthService) {}
+    constructor(private authService: AuthService) { }
 
-     @HttpCode(HttpStatus.OK)
-     @Post('login')
-     signIn(@Body() loginDto: LoginDto) {
+    @HttpCode(HttpStatus.OK)
+    @Post('login')
+    signIn(@Body() loginDto: LoginDto) {
         return this.authService.signIn(loginDto.email, loginDto.password);
-     }
+    }
 }
